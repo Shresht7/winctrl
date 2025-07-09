@@ -5,13 +5,13 @@
 ### Build
 
 ```
-g++ main.cpp -o winctrl.exe -luser32
+g++ main.cpp winctrl.cpp -o winctrl.exe -luser32
 ```
 
 ### Release
 
 ```
-g++ main.cpp -o winctrl.exe -luser32 -mwindows
+g++ main.cpp winctrl.cpp -o winctrl.exe -luser32 -mwindows
 ```
 
 #### Flags
