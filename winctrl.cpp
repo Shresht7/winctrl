@@ -1,5 +1,7 @@
 #include <chrono>
 #include <cmath>
+#include <string>
+#include <vector>
 #include "winctrl.h"
 
 const int MIN_WINDOW_SIZE = 100;
@@ -47,10 +49,18 @@ bool isDragging() { return s_isDragging; }
 
 void startDragging(MSLLHOOKSTRUCT *pMouse)
 {
-    s_isDragging = true;                                  // Start dragging
-    s_isResizing = false;                                 // Ensure only one mode is active
-    s_initialMousePos = pMouse->pt;                       // Store the initial mouse position
     s_draggedWindow = WindowFromPoint(s_initialMousePos); // Get the window handle under the cursor
+
+    // If the window is excluded, abort the operation
+    if (isExcludedWindow(s_draggedWindow))
+    {
+        s_draggedWindow = NULL; // Reset the dragged window handle
+        return;
+    }
+
+    s_isDragging = true;            // Start dragging
+    s_isResizing = false;           // Ensure only one mode is active
+    s_initialMousePos = pMouse->pt; // Store the initial mouse position
 }
 
 void stopDragging()
@@ -88,10 +98,18 @@ bool isResizing() { return s_isResizing; }
 
 void startResizing(MSLLHOOKSTRUCT *pMouse)
 {
+    s_draggedWindow = WindowFromPoint(pMouse->pt); // Get the window handle under the cursor
+
+    // If the window is excluded, abort the operation
+    if (isExcludedWindow(s_draggedWindow))
+    {
+        s_draggedWindow = NULL; // Reset the dragged window handle
+        return;
+    }
+
     s_isResizing = true;                                  // Start resizing
     s_isDragging = false;                                 // Ensure only one mode is active
     s_initialMousePos = pMouse->pt;                       // Store the initial mouse position
-    s_draggedWindow = WindowFromPoint(pMouse->pt);        // Get the window handle under the cursor
     GetWindowRect(s_draggedWindow, &s_initialWindowRect); // Store the initial window rect
 
     // Determine the closest corner for resizing
@@ -251,4 +269,42 @@ bool handleMouseWheel(MSLLHOOKSTRUCT *pMouse)
     }
 
     return false; // Throttled, so we skipped processing the event
+}
+
+static bool isExcludedWindow(HWND hWnd)
+{
+    if (hWnd == NULL)
+    {
+        return true;
+    }
+
+    char className[256];
+    GetClassName(hWnd, (LPWSTR)className, sizeof(className));
+    std::string clsName(className);
+
+    // List of window class names to exclude
+    static const std::vector<std::string> excludedClassNames = {
+        "Shell_TrayWnd",              // Taskbar
+        "Progman",                    // Desktop
+        "Windows.UI.Core.CoreWindow", // UWP apps like Start Menu, Widget
+        "ApplicationFrameWindow",     // Some UWP app frames,
+        "WorkerW",                    // Used by desktop wallpaper
+        "Button",                     // Common for system buttons
+    };
+
+    for (const auto &excludedName : excludedClassNames)
+    {
+        if (clsName == excludedName)
+        {
+            return true;
+        }
+    }
+
+    // Final check for the desktop and taskbar windows
+    if (hWnd == GetDesktopWindow() || hWnd == FindWindow(L"Shell_TrayWnd", NULL))
+    {
+        return true;
+    }
+
+    return false;
 }
