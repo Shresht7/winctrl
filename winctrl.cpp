@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cmath>
 #include "winctrl.h"
 
@@ -182,4 +183,72 @@ void performResize(MSLLHOOKSTRUCT *pMouse)
 
     // Command the window to resize to the new dimensions
     SetWindowPos(s_draggedWindow, NULL, newX, newY, newWidth, newHeight, SWP_NOZORDER);
+}
+
+// VIRTUAL DESKTOP SCROLL
+// ----------------------
+
+static const std::chrono::milliseconds THROTTLE_TIME(500);
+static std::chrono::steady_clock::time_point s_lastSwitchTime = std::chrono::steady_clock::now();
+
+static void simulateVirtualDesktopSwitch(bool scrollUp)
+{
+    INPUT inputs[6] = {};
+    ZeroMemory(inputs, sizeof(inputs));
+
+    // Press Win
+    inputs[0].type = INPUT_KEYBOARD;
+    inputs[0].ki.wVk = VK_LWIN;
+
+    // Press Ctrl
+    inputs[1].type = INPUT_KEYBOARD;
+    inputs[1].ki.wVk = VK_CONTROL;
+
+    // Press Left or Right Arrow
+    inputs[2].type = INPUT_KEYBOARD;
+    inputs[2].ki.wVk = scrollUp ? VK_LEFT : VK_RIGHT;
+
+    // Release Left or Right Arrow
+    inputs[3].type = INPUT_KEYBOARD;
+    inputs[3].ki.wVk = scrollUp ? VK_LEFT : VK_RIGHT;
+    inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
+
+    // Release Ctrl
+    inputs[4].type = INPUT_KEYBOARD;
+    inputs[4].ki.wVk = VK_CONTROL;
+    inputs[4].ki.dwFlags = KEYEVENTF_KEYUP;
+
+    // Release Win
+    inputs[5].type = INPUT_KEYBOARD;
+    inputs[5].ki.wVk = VK_LWIN;
+    inputs[5].ki.dwFlags = KEYEVENTF_KEYUP;
+
+    SendInput(6, inputs, sizeof(INPUT));
+}
+
+bool handleMouseWheel(MSLLHOOKSTRUCT *pMouse)
+{
+    auto now = std::chrono::steady_clock::now();
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(now - s_lastSwitchTime) > THROTTLE_TIME)
+    {
+        // Extract the scroll direction from the mouseData
+        short wheelDelta = HIWORD(pMouse->mouseData);
+        if (wheelDelta > 0)
+        {
+            // Scroll Up
+            simulateVirtualDesktopSwitch(true);
+        }
+        else
+        {
+            // Scroll Down
+            simulateVirtualDesktopSwitch(false);
+        }
+
+        // Update the lastSwitchTime to inform the throttle check
+        s_lastSwitchTime = now;
+
+        return true; // Event handled successfully
+    }
+
+    return false; // Throttled, so we skipped processing the event
 }

@@ -20,4 +20,8 @@ void startResizing(MSLLHOOKSTRUCT *pMouse);
 void stopResizing();
 void performResize(MSLLHOOKSTRUCT *pMouse);
 
+// VIRTUAL DESKTOP
+
+bool handleMouseWheel(MSLLHOOKSTRUCT *pMouse);
+
 #endif // WINCTRL_H

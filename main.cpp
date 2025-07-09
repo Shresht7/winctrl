@@ -60,6 +60,13 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             case WM_MBUTTONUP:
                 stopResizing();
                 break;
+
+            // Mouse Wheel Scroll
+            case WM_MOUSEWHEEL:
+                // The event was handled (and not throttled), so consume it
+                if (handleMouseWheel(pMouse))
+                    return 1;
+                break;
             }
         }
     }
