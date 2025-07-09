@@ -1,5 +1,6 @@
 #include <iostream>
 #include <windows.h>
+#include <cmath>
 
 /// Global variable to store the mouse-hook handle
 HHOOK g_mouseHook;
@@ -15,6 +16,26 @@ HWND g_draggedWindow;
 bool g_isResizing = false;
 /// The window rect at the start of the delta
 RECT g_initialWindowRect;
+
+// TODO: This currently does not support resizing from the edges
+
+enum ResizeCorner
+{
+    NONE,
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT,
+};
+
+/// Determines the corner to resize from
+ResizeCorner g_activeResizeCorner = NONE;
+
+/// Helper function to calculate the distance between two points
+double calculateDistance(POINT p1, POINT p2)
+{
+    return std::sqrt(std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2));
+}
 
 /// @brief Windows will call this callback function for every single mouse event (move, click etc).
 LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
@@ -49,6 +70,34 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 g_initialMousePos = pMouse->pt;                       // Store the initial mouse position
                 g_draggedWindow = WindowFromPoint(pMouse->pt);        // Get the window handle under the cursor
                 GetWindowRect(g_draggedWindow, &g_initialWindowRect); // Store the initial window rect
+
+                // Determine the closest corner for resizing
+                POINT topLeft = {g_initialWindowRect.left, g_initialWindowRect.top};
+                POINT topRight = {g_initialWindowRect.right, g_initialWindowRect.top};
+                POINT bottomLeft = {g_initialWindowRect.left, g_initialWindowRect.bottom};
+                POINT bottomRight = {g_initialWindowRect.right, g_initialWindowRect.bottom};
+
+                double distTL = calculateDistance(pMouse->pt, topLeft);
+                double distTR = calculateDistance(pMouse->pt, topRight);
+                double distBL = calculateDistance(pMouse->pt, bottomLeft);
+                double distBR = calculateDistance(pMouse->pt, bottomRight);
+
+                if (distTL < distTR && distTL < distBL && distTL < distBR)
+                {
+                    g_activeResizeCorner = TOP_LEFT;
+                }
+                else if (distTR < distTL && distTR < distBL && distTR < distBR)
+                {
+                    g_activeResizeCorner = TOP_RIGHT;
+                }
+                else if (distBL < distTL && distBL < distTR && distBL < distBR)
+                {
+                    g_activeResizeCorner = BOTTOM_LEFT;
+                }
+                else if (distBR < distTL && distBR < distTR && distBR < distBL)
+                {
+                    g_activeResizeCorner = BOTTOM_RIGHT;
+                }
             }
             break;
 
