@@ -1,6 +1,7 @@
 #include <iostream>
 #include <windows.h>
 #include <cmath>
+#include "main.h"
 
 // CONSTANTS
 // ---------
@@ -47,23 +48,6 @@ ResizeCorner g_activeResizeCorner = NONE;
 double calculateDistance(POINT p1, POINT p2)
 {
     return std::sqrt(std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2));
-}
-
-void handleWindowDrag(MSLLHOOKSTRUCT *pMouse)
-{
-    // Get the current position of the window
-    RECT windowRect;
-    GetWindowRect(g_draggedWindow, &windowRect);
-
-    // Calculate the window's new top-left coordinates
-    int newX = windowRect.left + (pMouse->pt.x - g_initialMousePos.x);
-    int newY = windowRect.top + (pMouse->pt.y - g_initialMousePos.y);
-
-    // Move the window to the new coordinates
-    SetWindowPos(g_draggedWindow, NULL, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-
-    // Update the mouse position for the next movement
-    g_initialMousePos = pMouse->pt;
 }
 
 /// @brief Windows will call this callback function for every single mouse event (move, click etc).
@@ -139,56 +123,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             }
             else if (g_isResizing && g_draggedWindow)
             {
-                // Calculate the change in mouse position from the start
-                int dx = pMouse->pt.x - g_initialMousePos.x;
-                int dy = pMouse->pt.y - g_initialMousePos.y;
-
-                // Determine the dimensions of the new window
-                int newX = g_initialWindowRect.left;
-                int newY = g_initialWindowRect.top;
-                int newWidth = g_initialWindowRect.right - g_initialWindowRect.left;
-                int newHeight = g_initialWindowRect.bottom - g_initialWindowRect.top;
-
-                // Adjust the dimensions based on which corner is active
-                switch (g_activeResizeCorner)
-                {
-                case TOP_LEFT:
-                    newX = g_initialWindowRect.left + dx;
-                    newY = g_initialWindowRect.top + dy;
-                    newWidth = g_initialWindowRect.right - newX;
-                    newHeight = g_initialWindowRect.bottom - newY;
-                    break;
-                case TOP_RIGHT:
-                    newY = g_initialWindowRect.top + dy;
-                    newWidth = (g_initialWindowRect.right + dx) - g_initialWindowRect.left;
-                    newHeight = g_initialWindowRect.bottom - newY;
-                    break;
-                case BOTTOM_LEFT:
-                    newX = g_initialWindowRect.left + dx;
-                    newWidth = g_initialWindowRect.right - newX;
-                    newHeight = (g_initialWindowRect.bottom + dy) - g_initialWindowRect.top;
-                    break;
-                case BOTTOM_RIGHT:
-                    newWidth = (g_initialWindowRect.right + dx) - g_initialWindowRect.left;
-                    newHeight = (g_initialWindowRect.bottom + dy) - g_initialWindowRect.top;
-                    break;
-                case NONE:
-                default:
-                    break;
-                }
-
-                // Enforce a minimum window size
-                if (newWidth < MIN_WINDOW_SIZE)
-                {
-                    newWidth = MIN_WINDOW_SIZE;
-                }
-                if (newHeight < MIN_WINDOW_SIZE)
-                {
-                    newHeight = MIN_WINDOW_SIZE;
-                }
-
-                // Command the window to resize to the new dimensions
-                SetWindowPos(g_draggedWindow, NULL, newX, newY, newWidth, newHeight, SWP_NOZORDER);
+                handleWindowResize(pMouse);
             }
             break;
 
@@ -210,6 +145,77 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(g_mouseHook, nCode, wParam, lParam);
 }
 
+void handleWindowDrag(MSLLHOOKSTRUCT *pMouse)
+{
+    // Get the current position of the window
+    RECT windowRect;
+    GetWindowRect(g_draggedWindow, &windowRect);
+
+    // Calculate the window's new top-left coordinates
+    int newX = windowRect.left + (pMouse->pt.x - g_initialMousePos.x);
+    int newY = windowRect.top + (pMouse->pt.y - g_initialMousePos.y);
+
+    // Move the window to the new coordinates
+    SetWindowPos(g_draggedWindow, NULL, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+    // Update the mouse position for the next movement
+    g_initialMousePos = pMouse->pt;
+}
+
+void handleWindowResize(MSLLHOOKSTRUCT *pMouse)
+{
+
+    // Calculate the change in mouse position from the start
+    int dx = pMouse->pt.x - g_initialMousePos.x;
+    int dy = pMouse->pt.y - g_initialMousePos.y;
+
+    // Determine the dimensions of the new window
+    int newX = g_initialWindowRect.left;
+    int newY = g_initialWindowRect.top;
+    int newWidth = g_initialWindowRect.right - g_initialWindowRect.left;
+    int newHeight = g_initialWindowRect.bottom - g_initialWindowRect.top;
+
+    // Adjust the dimensions based on which corner is active
+    switch (g_activeResizeCorner)
+    {
+    case TOP_LEFT:
+        newX = g_initialWindowRect.left + dx;
+        newY = g_initialWindowRect.top + dy;
+        newWidth = g_initialWindowRect.right - newX;
+        newHeight = g_initialWindowRect.bottom - newY;
+        break;
+    case TOP_RIGHT:
+        newY = g_initialWindowRect.top + dy;
+        newWidth = (g_initialWindowRect.right + dx) - g_initialWindowRect.left;
+        newHeight = g_initialWindowRect.bottom - newY;
+        break;
+    case BOTTOM_LEFT:
+        newX = g_initialWindowRect.left + dx;
+        newWidth = g_initialWindowRect.right - newX;
+        newHeight = (g_initialWindowRect.bottom + dy) - g_initialWindowRect.top;
+        break;
+    case BOTTOM_RIGHT:
+        newWidth = (g_initialWindowRect.right + dx) - g_initialWindowRect.left;
+        newHeight = (g_initialWindowRect.bottom + dy) - g_initialWindowRect.top;
+        break;
+    case NONE:
+    default:
+        break;
+    }
+
+    // Enforce a minimum window size
+    if (newWidth < MIN_WINDOW_SIZE)
+    {
+        newWidth = MIN_WINDOW_SIZE;
+    }
+    if (newHeight < MIN_WINDOW_SIZE)
+    {
+        newHeight = MIN_WINDOW_SIZE;
+    }
+
+    // Command the window to resize to the new dimensions
+    SetWindowPos(g_draggedWindow, NULL, newX, newY, newWidth, newHeight, SWP_NOZORDER);
+}
 /// Main entrypoint of the application
 int main()
 {
