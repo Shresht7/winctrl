@@ -126,12 +126,52 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 int dx = pMouse->pt.x - g_initialMousePos.x;
                 int dy = pMouse->pt.y - g_initialMousePos.y;
 
-                // Calculate the new width and height of the window
-                int newWidth = (g_initialWindowRect.right - g_initialWindowRect.left) + dx;
-                int newHeight = (g_initialWindowRect.bottom - g_initialWindowRect.top) + dy;
+                // Determine the dimensions of the new window
+                int newX = g_initialWindowRect.left;
+                int newY = g_initialWindowRect.top;
+                int newWidth = g_initialWindowRect.right - g_initialWindowRect.left;
+                int newHeight = g_initialWindowRect.bottom - g_initialWindowRect.top;
+
+                // Adjust the dimensions based on which corner is active
+                switch (g_activeResizeCorner)
+                {
+                case TOP_LEFT:
+                    newX = g_initialWindowRect.left + dx;
+                    newY = g_initialWindowRect.top + dy;
+                    newWidth = g_initialWindowRect.right - newX;
+                    newHeight = g_initialWindowRect.bottom - newY;
+                    break;
+                case TOP_RIGHT:
+                    newY = g_initialWindowRect.top + dy;
+                    newWidth = (g_initialWindowRect.right + dx) - g_initialWindowRect.left;
+                    newHeight = g_initialWindowRect.bottom - newY;
+                    break;
+                case BOTTOM_LEFT:
+                    newX = g_initialWindowRect.left + dx;
+                    newWidth = g_initialWindowRect.right - newX;
+                    newHeight = (g_initialWindowRect.bottom + dy) - g_initialWindowRect.top;
+                    break;
+                case BOTTOM_RIGHT:
+                    newWidth = (g_initialWindowRect.right + dx) - g_initialWindowRect.left;
+                    newHeight = (g_initialWindowRect.bottom + dy) - g_initialWindowRect.top;
+                    break;
+                case NONE:
+                default:
+                    break;
+                }
+
+                // Enforce a minimum window size
+                if (newWidth < 100)
+                {
+                    newWidth = 100;
+                }
+                if (newHeight < 100)
+                {
+                    newHeight = 100;
+                }
 
                 // Command the window to resize to the new dimensions
-                SetWindowPos(g_draggedWindow, NULL, 0, 0, newWidth, newHeight, SWP_NOMOVE | SWP_NOZORDER);
+                SetWindowPos(g_draggedWindow, NULL, newX, newY, newWidth, newHeight, SWP_NOZORDER);
             }
             break;
 
@@ -143,8 +183,9 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
         // Middle button up
         case WM_MBUTTONUP:
-            g_isResizing = false;   // Stop resizing
-            g_draggedWindow = NULL; // Reset the dragged window handle
+            g_isResizing = false;        // Stop resizing
+            g_draggedWindow = NULL;      // Reset the dragged window handle
+            g_activeResizeCorner = NONE; // Reset the active resize corner
             break;
         }
     }
