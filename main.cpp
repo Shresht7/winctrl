@@ -11,6 +11,11 @@ POINT g_initialMousePos;
 /// The window handle of the window being dragged
 HWND g_draggedWindow;
 
+/// State to track if we are currently resizing a window
+bool g_isResizing = false;
+/// The window rect at the start of the delta
+RECT g_initialWindowRect;
+
 /// @brief Windows will call this callback function for every single mouse event (move, click etc).
 LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
@@ -34,6 +39,17 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             }
             break;
 
+        // Middle button down
+        case WM_MBUTTONDOWN:
+            if (isWinKeyDown)
+            {
+                g_isResizing = true;                                  // Start resizing
+                g_initialMousePos = pMouse->pt;                       // Store the initial mouse position
+                g_draggedWindow = WindowFromPoint(pMouse->pt);        // Get the window handle under the cursor
+                GetWindowRect(g_draggedWindow, &g_initialWindowRect); // Store the initial window rect
+            }
+            break;
+
         // Mouse move
         case WM_MOUSEMOVE:
             //  If we are dragging a window when Win+LButton is pressed
@@ -53,11 +69,30 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 // Update the mouse position for the next movement
                 g_initialMousePos = pMouse->pt;
             }
+            else if (g_isResizing && g_draggedWindow)
+            {
+                // Calculate the change in mouse position from the start
+                int dx = pMouse->pt.x - g_initialMousePos.x;
+                int dy = pMouse->pt.y - g_initialMousePos.y;
+
+                // Calculate the new width and height of the window
+                int newWidth = (g_initialWindowRect.right - g_initialWindowRect.left) + dx;
+                int newHeight = (g_initialWindowRect.bottom - g_initialWindowRect.top) + dy;
+
+                // Command the window to resize to the new dimensions
+                SetWindowPos(g_draggedWindow, NULL, 0, 0, newWidth, newHeight, SWP_NOMOVE | SWP_NOZORDER);
+            }
             break;
 
         // Left button up
         case WM_LBUTTONUP:
             g_isDragging = false;   // Stop dragging. This will prevent the WM_MOUSEMOVE logic from running until the next drag starts
+            g_draggedWindow = NULL; // Reset the dragged window handle
+            break;
+
+        // Middle button up
+        case WM_MBUTTONUP:
+            g_isResizing = false;   // Stop resizing
             g_draggedWindow = NULL; // Reset the dragged window handle
             break;
         }
