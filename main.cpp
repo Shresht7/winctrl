@@ -28,46 +28,39 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
         // Check if the left Windows key is pressed
         bool isWinKeyDown = GetAsyncKeyState(VK_LWIN) & KEY_PRESSED_FLAG;
-
-        switch (wParam)
+        if (isWinKeyDown)
         {
-        // Left button down
-        case WM_LBUTTONDOWN:
-            if (isWinKeyDown)
+
+            switch (wParam)
             {
+            // Left button down
+            case WM_LBUTTONDOWN:
                 startDragging(pMouse);
-            }
-            break;
+                break;
 
-        // Middle button down
-        case WM_MBUTTONDOWN:
-            if (isWinKeyDown)
-            {
+            // Middle button down
+            case WM_MBUTTONDOWN:
                 startResizing(pMouse);
-            }
-            break;
+                break;
 
-        // Mouse move
-        case WM_MOUSEMOVE:
-            if (isDragging())
-            {
-                performDrag(pMouse);
-            }
-            else if (isResizing())
-            {
-                performResize(pMouse);
-            }
-            break;
+            // Mouse move
+            case WM_MOUSEMOVE:
+                if (isDragging())
+                    performDrag(pMouse);
+                else if (isResizing())
+                    performResize(pMouse);
+                break;
 
-        // Left button up
-        case WM_LBUTTONUP:
-            stopDragging();
-            break;
+            // Left button up
+            case WM_LBUTTONUP:
+                stopDragging();
+                break;
 
-        // Middle button up
-        case WM_MBUTTONUP:
-            stopResizing();
-            break;
+            // Middle button up
+            case WM_MBUTTONUP:
+                stopResizing();
+                break;
+            }
         }
     }
 
@@ -100,9 +93,7 @@ int main()
 {
     // Set a low-level mouse hook. This tells Windows to call our MouseProc function for every mouse event
     if (!setupMouseHook())
-    {
         return 1; // Mouse hook failed
-    }
 
     // A message loop to keep our program running in the background listening for events
     // This is essential for our hook to work
