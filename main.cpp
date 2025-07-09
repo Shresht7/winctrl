@@ -34,6 +34,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             if (isWinKeyDown)
             {
                 g_isDragging = true;                                  // Start dragging
+                g_isResizing = false;                                 // Ensure only one mode is active
                 g_initialMousePos = pMouse->pt;                       // Store the initial mouse position
                 g_draggedWindow = WindowFromPoint(g_initialMousePos); // Get the window handle under the cursor
             }
@@ -44,6 +45,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             if (isWinKeyDown)
             {
                 g_isResizing = true;                                  // Start resizing
+                g_isDragging = false;                                 // Ensure only one mode is active
                 g_initialMousePos = pMouse->pt;                       // Store the initial mouse position
                 g_draggedWindow = WindowFromPoint(pMouse->pt);        // Get the window handle under the cursor
                 GetWindowRect(g_draggedWindow, &g_initialWindowRect); // Store the initial window rect
