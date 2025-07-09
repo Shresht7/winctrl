@@ -2,6 +2,15 @@
 #include <windows.h>
 #include <cmath>
 
+// CONSTANTS
+// ---------
+
+const int KEY_PRESSED_FLAG = 0x8000;
+const int MIN_WINDOW_SIZE = 100;
+
+// GLOBAL VARIABLES
+// ----------------
+
 /// Global variable to store the mouse-hook handle
 HHOOK g_mouseHook;
 
@@ -46,7 +55,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
         MSLLHOOKSTRUCT *pMouse = (MSLLHOOKSTRUCT *)lParam;
 
         // Check if the left Windows key is pressed
-        bool isWinKeyDown = GetAsyncKeyState(VK_LWIN) & 0x8000;
+        bool isWinKeyDown = GetAsyncKeyState(VK_LWIN) & KEY_PRESSED_FLAG;
 
         switch (wParam)
         {
@@ -161,13 +170,13 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 }
 
                 // Enforce a minimum window size
-                if (newWidth < 100)
+                if (newWidth < MIN_WINDOW_SIZE)
                 {
-                    newWidth = 100;
+                    newWidth = MIN_WINDOW_SIZE;
                 }
-                if (newHeight < 100)
+                if (newHeight < MIN_WINDOW_SIZE)
                 {
-                    newHeight = 100;
+                    newHeight = MIN_WINDOW_SIZE;
                 }
 
                 // Command the window to resize to the new dimensions
