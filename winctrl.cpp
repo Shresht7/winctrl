@@ -278,18 +278,18 @@ static bool isExcludedWindow(HWND hWnd)
         return true;
     }
 
-    char className[256];
-    GetClassName(hWnd, (LPWSTR)className, sizeof(className));
-    std::string clsName(className);
+    wchar_t className[256];
+    GetClassNameW(hWnd, className, sizeof(className) / sizeof(wchar_t));
+    std::wstring clsName(className);
 
     // List of window class names to exclude
-    static const std::vector<std::string> excludedClassNames = {
-        "Shell_TrayWnd",              // Taskbar
-        "Progman",                    // Desktop
-        "Windows.UI.Core.CoreWindow", // UWP apps like Start Menu, Widget
-        "ApplicationFrameWindow",     // Some UWP app frames,
-        "WorkerW",                    // Used by desktop wallpaper
-        "Button",                     // Common for system buttons
+    static const std::vector<std::wstring> excludedClassNames = {
+        L"Shell_TrayWnd",              // Taskbar
+        L"Progman",                    // Desktop
+        L"Windows.UI.Core.CoreWindow", // UWP apps like Start Menu, Widget
+        L"ApplicationFrameWindow",     // Some UWP app frames,
+        L"WorkerW",                    // Used by desktop wallpaper
+        L"Button",                     // Common for system buttons
     };
 
     for (const auto &excludedName : excludedClassNames)
@@ -301,7 +301,7 @@ static bool isExcludedWindow(HWND hWnd)
     }
 
     // Final check for the desktop and taskbar windows
-    if (hWnd == GetDesktopWindow() || hWnd == FindWindow(L"Shell_TrayWnd", NULL))
+    if (hWnd == GetDesktopWindow() || hWnd == FindWindowW(L"Shell_TrayWnd", NULL))
     {
         return true;
     }
