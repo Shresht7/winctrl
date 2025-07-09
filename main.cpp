@@ -40,10 +40,30 @@ enum ResizeCorner
 /// Determines the corner to resize from
 ResizeCorner g_activeResizeCorner = NONE;
 
+// HELPER FUNCTIONS
+// ----------------
+
 /// Helper function to calculate the distance between two points
 double calculateDistance(POINT p1, POINT p2)
 {
     return std::sqrt(std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2));
+}
+
+void handleWindowDrag(MSLLHOOKSTRUCT *pMouse)
+{
+    // Get the current position of the window
+    RECT windowRect;
+    GetWindowRect(g_draggedWindow, &windowRect);
+
+    // Calculate the window's new top-left coordinates
+    int newX = windowRect.left + (pMouse->pt.x - g_initialMousePos.x);
+    int newY = windowRect.top + (pMouse->pt.y - g_initialMousePos.y);
+
+    // Move the window to the new coordinates
+    SetWindowPos(g_draggedWindow, NULL, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+    // Update the mouse position for the next movement
+    g_initialMousePos = pMouse->pt;
 }
 
 /// @brief Windows will call this callback function for every single mouse event (move, click etc).
@@ -115,19 +135,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             //  If we are dragging a window when Win+LButton is pressed
             if (g_isDragging && g_draggedWindow)
             {
-                // Get the current position of the window
-                RECT windowRect;
-                GetWindowRect(g_draggedWindow, &windowRect);
-
-                // Calculate the window's new top-left coordinates
-                int newX = windowRect.left + (pMouse->pt.x - g_initialMousePos.x);
-                int newY = windowRect.top + (pMouse->pt.y - g_initialMousePos.y);
-
-                // Move the window to the new coordinates
-                SetWindowPos(g_draggedWindow, NULL, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-
-                // Update the mouse position for the next movement
-                g_initialMousePos = pMouse->pt;
+                handleWindowDrag(pMouse);
             }
             else if (g_isResizing && g_draggedWindow)
             {
