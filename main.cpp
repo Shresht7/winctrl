@@ -216,11 +216,30 @@ void handleWindowResize(MSLLHOOKSTRUCT *pMouse)
     // Command the window to resize to the new dimensions
     SetWindowPos(g_draggedWindow, NULL, newX, newY, newWidth, newHeight, SWP_NOZORDER);
 }
+
+bool setupMouseHook()
+{
+    g_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseProc, NULL, 0);
+    return g_mouseHook != NULL;
+}
+
+void teardownMouseHook()
+{
+    if (g_mouseHook)
+    {
+        UnhookWindowsHookEx(g_mouseHook);
+        g_mouseHook = NULL;
+    }
+}
+
 /// Main entrypoint of the application
 int main()
 {
     // Set a low-level mouse hook. This tells Windows to call our MouseProc function for every mouse event
-    g_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseProc, NULL, 0);
+    if (!setupMouseHook())
+    {
+        return 1; // Mouse hook failed
+    }
 
     // A message loop to keep our program running in the background listening for events
     // This is essential for our hook to work
@@ -232,7 +251,7 @@ int main()
     }
 
     // Unhook before exiting. This is crucial for cleanup
-    UnhookWindowsHookEx(g_mouseHook);
+    teardownMouseHook();
 
     return 0;
 }
