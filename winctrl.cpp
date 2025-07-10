@@ -49,7 +49,8 @@ bool isDragging() { return s_isDragging; }
 
 void startDragging(MSLLHOOKSTRUCT *pMouse)
 {
-    s_draggedWindow = WindowFromPoint(s_initialMousePos); // Get the window handle under the cursor
+    HWND hWnd = WindowFromPoint(pMouse->pt);      // Get the window handle under the cursor
+    s_draggedWindow = GetAncestor(hWnd, GA_ROOT); // Get its top-level window
 
     // If the window is excluded, abort the operation
     if (isExcludedWindow(s_draggedWindow))
@@ -98,7 +99,8 @@ bool isResizing() { return s_isResizing; }
 
 void startResizing(MSLLHOOKSTRUCT *pMouse)
 {
-    s_draggedWindow = WindowFromPoint(pMouse->pt); // Get the window handle under the cursor
+    HWND hWnd = WindowFromPoint(pMouse->pt);      // Get the window handle under the cursor
+    s_draggedWindow = GetAncestor(hWnd, GA_ROOT); // Get its top-level window
 
     // If the window is excluded, abort the operation
     if (isExcludedWindow(s_draggedWindow))
