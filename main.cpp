@@ -6,18 +6,23 @@
 // CONSTANTS
 // ---------
 
+// Flag for when a key is pressed
 const int KEY_PRESSED_FLAG = 0x8000;
+
+// A window cannot be resized below this many pixels
 const int MIN_WINDOW_SIZE = 100;
 
 // GLOBAL VARIABLES
 // ----------------
 
-/// Global variable to store the mouse-hook handle
+// Global variable to store the mouse-hook handle
 HHOOK g_mouseHook;
 
+// Global variable to store the keyboard-hook handle
 HHOOK g_keyboardHook;
 
-bool shouldConsumeWin = false;
+// Indicates if we should consume the Win key after a successful `winctrl` action
+bool g_shouldConsumeWin = false;
 
 // MouseProc Callback
 // ------------------
@@ -40,13 +45,13 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             // Left button down
             case WM_LBUTTONDOWN:
                 startDragging(pMouse);
-                shouldConsumeWin = true;
+                g_shouldConsumeWin = true;
                 break;
 
             // Middle button down
             case WM_MBUTTONDOWN:
                 startResizing(pMouse);
-                shouldConsumeWin = true;
+                g_shouldConsumeWin = true;
                 break;
 
             // Mouse move
@@ -71,8 +76,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             case WM_MOUSEWHEEL:
                 // The event was handled (and not throttled), so consume it
                 if (handleMouseWheel(pMouse))
-                    shouldConsumeWin = true;
-                return 1;
+                    g_shouldConsumeWin = true;
                 break;
             }
         }
@@ -95,14 +99,14 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
         if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)
         {
             // Check to see if we triggered a winctrl shortcut, indicating that we need to consume the Win key release
-            if (pKeyboard->vkCode == VK_LWIN && shouldConsumeWin)
+            if (pKeyboard->vkCode == VK_LWIN && g_shouldConsumeWin)
             {
                 // Send an Esc key to consume the held-down Win key
                 INPUT input = {0};
                 input.type = INPUT_KEYBOARD;
                 input.ki.wVk = VK_ESCAPE;
                 SendInput(1, &input, sizeof(INPUT));
-                shouldConsumeWin = false; // Reset the flag for future operations
+                g_shouldConsumeWin = false; // Reset the flag for future operations
             }
         }
     }
