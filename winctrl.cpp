@@ -32,7 +32,8 @@ enum ResizeRegion
     BOTTOM_RIGHT,
     BOTTOM,
     BOTTOM_LEFT,
-    LEFT
+    LEFT,
+    CENTER
 };
 
 /// Determines the corner or edge to resize from
@@ -143,7 +144,7 @@ void startResizing(MSLLHOOKSTRUCT *pMouse)
         if (col == 0)
             s_activeResizeRegion = LEFT;
         else if (col == 1)
-            s_activeResizeRegion = NONE; // Center - no resize
+            s_activeResizeRegion = CENTER;
         else
             s_activeResizeRegion = RIGHT;
     }
@@ -155,13 +156,6 @@ void startResizing(MSLLHOOKSTRUCT *pMouse)
             s_activeResizeRegion = BOTTOM;
         else
             s_activeResizeRegion = BOTTOM_RIGHT;
-    }
-
-    // If the center is clicked, don't start resizing
-    if (s_activeResizeRegion == NONE)
-    {
-        s_isResizing = false;
-        s_draggedWindow = NULL;
     }
 }
 
@@ -222,6 +216,20 @@ void performResize(MSLLHOOKSTRUCT *pMouse)
         newX = s_initialWindowRect.left + dx;
         newWidth = s_initialWindowRect.right - newX;
         break;
+    case CENTER:
+    {
+        // Resize from the center, maintaining aspect ratio based on vertical mouse movement
+        float aspectRatio = (float)newWidth / (float)newHeight;
+        int sizeChange = dy * 2; // Make resizing more sensitive
+
+        newWidth += (int)(sizeChange * aspectRatio);
+        newHeight += sizeChange;
+
+        // Reposition the window to keep its center stationary
+        newX -= (int)((sizeChange * aspectRatio) / 2);
+        newY -= sizeChange / 2;
+        break;
+    }
     case NONE:
     default:
         break;
