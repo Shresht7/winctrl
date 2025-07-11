@@ -26,6 +26,6 @@ bool handleMouseWheel(MSLLHOOKSTRUCT *pMouse);
 
 // HELPER FUNCTIONS
 
-static bool isExcludedWindow(HWND hWnd);
+bool isExcludedWindow(HWND hWnd);
 
 #endif // WINCTRL_H
