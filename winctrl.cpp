@@ -4,6 +4,7 @@
 #include <vector>
 #include "winctrl.h"
 
+// A window cannot be resized below this many pixels
 const int MIN_WINDOW_SIZE = 100;
 
 // STATE

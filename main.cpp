@@ -9,9 +9,6 @@
 // Flag for when a key is pressed
 const int KEY_PRESSED_FLAG = 0x8000;
 
-// A window cannot be resized below this many pixels
-const int MIN_WINDOW_SIZE = 100;
-
 // GLOBAL VARIABLES
 // ----------------
 
