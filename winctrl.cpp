@@ -317,6 +317,57 @@ bool handleMouseWheel(MSLLHOOKSTRUCT *pMouse)
     return false; // Throttled, so we skipped processing the event
 }
 
+// TRANSPARENCY
+// ------------
+
+bool handleTransparency(MSLLHOOKSTRUCT *pMouse)
+{
+    HWND hWnd = WindowFromPoint(pMouse->pt);
+    HWND targetWnd = GetAncestor(hWnd, GA_ROOT);
+
+    if (isExcludedWindow(targetWnd))
+    {
+        return false;
+    }
+
+    // Ensure the window has the layered extended style
+    LONG_PTR exStyle = GetWindowLongPtr(targetWnd, GWL_EXSTYLE);
+    if (!(exStyle & WS_EX_LAYERED))
+    {
+        SetWindowLongPtr(targetWnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+    }
+
+    // Get current alpha
+    BYTE currentAlpha;
+    DWORD flags;
+    GetLayeredWindowAttributes(targetWnd, NULL, &currentAlpha, &flags);
+
+    // If the window has no transparency set yet, default to fully opaque
+    if (!(flags & LWA_ALPHA))
+    {
+        currentAlpha = 255;
+    }
+
+    // Determine scroll direction
+    short wheelDelta = HIWORD(pMouse->mouseData);
+    int alphaChange = 5; // Amount to change alpha by
+
+    if (wheelDelta > 0)
+    {
+        // Scroll Up - Increase opacity
+        currentAlpha = std::min(255, currentAlpha + alphaChange);
+    }
+    else
+    {                                                            // Scroll Down - Decrease opacity
+        currentAlpha = std::max(25, currentAlpha - alphaChange); // Min alpha of ~10%
+    }
+
+    // Apply the new alpha value
+    SetLayeredWindowAttributes(targetWnd, 0, currentAlpha, LWA_ALPHA);
+
+    return true; // Event handled
+}
+
 bool isExcludedWindow(HWND hWnd)
 {
     if (hWnd == NULL)
