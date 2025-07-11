@@ -5,7 +5,11 @@ GNOME like mouse-centric window management on Windows.
 ## Features
 
 - **Move Windows**: Hold down the <kbd>Win</kbd> key and drag a window with the `Left Mouse Button` to move it. You don't have to target the titlebar!
-- **Resize Windows**: Hold down the <kbd>Win</kbd> key and draw a window with the `Middle Mouse Button` to resize from the closest corner.
+- **Resize Windows**: Hold down the <kbd>Win</kbd> key and drag with the `Middle Mouse Button`. Resizing is directional based on where you click:
+  - **Edges**: Dragging from a window's side or top/bottom edge resizes along that axis.
+  - **Corners**: Dragging from a corner resizes both height and width.
+  - **Center**: Dragging from the center "zooms" the window in and out, preserving its aspect ratio.
+- **Adjust Transparency**: Hold <kbd>Win</kbd> + <kbd>Ctrl</kbd> and use the `Mouse Scroll Wheel` to adjust the transparency of the window under the cursor.
 - **Virtual Desktop Switch**: Hold down the <kbd>Win</kbd> key and use the `Mouse Scroll Wheel` to switch between virtual desktops.
 
 ## Usage
