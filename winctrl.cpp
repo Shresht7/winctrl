@@ -22,17 +22,21 @@ static POINT s_initialMousePos;
 /// The window rect at the start of the delta
 static RECT s_initialWindowRect;
 
-enum ResizeCorner
+enum ResizeRegion
 {
     NONE,
     TOP_LEFT,
+    TOP,
     TOP_RIGHT,
-    BOTTOM_LEFT,
+    RIGHT,
     BOTTOM_RIGHT,
+    BOTTOM,
+    BOTTOM_LEFT,
+    LEFT
 };
 
-/// Determines the corner to resize from
-static ResizeCorner s_activeResizeCorner = NONE;
+/// Determines the corner or edge to resize from
+static ResizeRegion s_activeResizeRegion = NONE;
 
 // HELPER FUNCTIONS
 // ----------------
@@ -115,32 +119,49 @@ void startResizing(MSLLHOOKSTRUCT *pMouse)
     s_initialMousePos = pMouse->pt;                       // Store the initial mouse position
     GetWindowRect(s_draggedWindow, &s_initialWindowRect); // Store the initial window rect
 
-    // Determine the closest corner for resizing
-    POINT topLeft = {s_initialWindowRect.left, s_initialWindowRect.top};
-    POINT topRight = {s_initialWindowRect.right, s_initialWindowRect.top};
-    POINT bottomLeft = {s_initialWindowRect.left, s_initialWindowRect.bottom};
-    POINT bottomRight = {s_initialWindowRect.right, s_initialWindowRect.bottom};
+    // Determine the resize region based on a 3x3 grid
+    RECT rect = s_initialWindowRect;
+    POINT pt = pMouse->pt;
 
-    double distTL = calculateDistance(pMouse->pt, topLeft);
-    double distTR = calculateDistance(pMouse->pt, topRight);
-    double distBL = calculateDistance(pMouse->pt, bottomLeft);
-    double distBR = calculateDistance(pMouse->pt, bottomRight);
+    int width = rect.right - rect.left;
+    int height = rect.bottom - rect.top;
 
-    if (distTL < distTR && distTL < distBL && distTL < distBR)
+    int col = (pt.x - rect.left) * 3 / width;
+    int row = (pt.y - rect.top) * 3 / height;
+
+    if (row == 0)
     {
-        s_activeResizeCorner = TOP_LEFT;
+        if (col == 0)
+            s_activeResizeRegion = TOP_LEFT;
+        else if (col == 1)
+            s_activeResizeRegion = TOP;
+        else
+            s_activeResizeRegion = TOP_RIGHT;
     }
-    else if (distTR < distTL && distTR < distBL && distTR < distBR)
+    else if (row == 1)
     {
-        s_activeResizeCorner = TOP_RIGHT;
+        if (col == 0)
+            s_activeResizeRegion = LEFT;
+        else if (col == 1)
+            s_activeResizeRegion = NONE; // Center - no resize
+        else
+            s_activeResizeRegion = RIGHT;
     }
-    else if (distBL < distTL && distBL < distTR && distBL < distBR)
+    else
     {
-        s_activeResizeCorner = BOTTOM_LEFT;
+        if (col == 0)
+            s_activeResizeRegion = BOTTOM_LEFT;
+        else if (col == 1)
+            s_activeResizeRegion = BOTTOM;
+        else
+            s_activeResizeRegion = BOTTOM_RIGHT;
     }
-    else if (distBR < distTL && distBR < distTR && distBR < distBL)
+
+    // If the center is clicked, don't start resizing
+    if (s_activeResizeRegion == NONE)
     {
-        s_activeResizeCorner = BOTTOM_RIGHT;
+        s_isResizing = false;
+        s_draggedWindow = NULL;
     }
 }
 
@@ -148,7 +169,7 @@ void stopResizing()
 {
     s_isResizing = false;        // Stop resizing
     s_draggedWindow = NULL;      // Reset the dragged window handle
-    s_activeResizeCorner = NONE; // Reset the active resize corner
+    s_activeResizeRegion = NONE; // Reset the active resize region
 }
 
 void performResize(MSLLHOOKSTRUCT *pMouse)
@@ -164,8 +185,8 @@ void performResize(MSLLHOOKSTRUCT *pMouse)
     int newWidth = s_initialWindowRect.right - s_initialWindowRect.left;
     int newHeight = s_initialWindowRect.bottom - s_initialWindowRect.top;
 
-    // Adjust the dimensions based on which corner is active
-    switch (s_activeResizeCorner)
+    // Adjust the dimensions based on which region is active
+    switch (s_activeResizeRegion)
     {
     case TOP_LEFT:
         newX = s_initialWindowRect.left + dx;
@@ -173,19 +194,33 @@ void performResize(MSLLHOOKSTRUCT *pMouse)
         newWidth = s_initialWindowRect.right - newX;
         newHeight = s_initialWindowRect.bottom - newY;
         break;
+    case TOP:
+        newY = s_initialWindowRect.top + dy;
+        newHeight = s_initialWindowRect.bottom - newY;
+        break;
     case TOP_RIGHT:
         newY = s_initialWindowRect.top + dy;
         newWidth = (s_initialWindowRect.right + dx) - s_initialWindowRect.left;
         newHeight = s_initialWindowRect.bottom - newY;
+        break;
+    case RIGHT:
+        newWidth = (s_initialWindowRect.right + dx) - s_initialWindowRect.left;
+        break;
+    case BOTTOM_RIGHT:
+        newWidth = (s_initialWindowRect.right + dx) - s_initialWindowRect.left;
+        newHeight = (s_initialWindowRect.bottom + dy) - s_initialWindowRect.top;
+        break;
+    case BOTTOM:
+        newHeight = (s_initialWindowRect.bottom + dy) - s_initialWindowRect.top;
         break;
     case BOTTOM_LEFT:
         newX = s_initialWindowRect.left + dx;
         newWidth = s_initialWindowRect.right - newX;
         newHeight = (s_initialWindowRect.bottom + dy) - s_initialWindowRect.top;
         break;
-    case BOTTOM_RIGHT:
-        newWidth = (s_initialWindowRect.right + dx) - s_initialWindowRect.left;
-        newHeight = (s_initialWindowRect.bottom + dy) - s_initialWindowRect.top;
+    case LEFT:
+        newX = s_initialWindowRect.left + dx;
+        newWidth = s_initialWindowRect.right - newX;
         break;
     case NONE:
     default:
@@ -274,7 +309,7 @@ bool handleMouseWheel(MSLLHOOKSTRUCT *pMouse)
     return false; // Throttled, so we skipped processing the event
 }
 
-static bool isExcludedWindow(HWND hWnd)
+bool isExcludedWindow(HWND hWnd)
 {
     if (hWnd == NULL)
     {
