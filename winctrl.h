@@ -24,6 +24,8 @@ void performResize(MSLLHOOKSTRUCT *pMouse);
 
 bool handleMouseWheel(MSLLHOOKSTRUCT *pMouse);
 
+bool handleTransparency(MSLLHOOKSTRUCT *pMouse);
+
 // HELPER FUNCTIONS
 
 bool isExcludedWindow(HWND hWnd);

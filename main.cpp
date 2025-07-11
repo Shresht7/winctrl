@@ -71,9 +71,21 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
             // Mouse Wheel Scroll
             case WM_MOUSEWHEEL:
-                // The event was handled (and not throttled), so consume it
-                if (handleMouseWheel(pMouse))
-                    g_shouldConsumeWin = true;
+                // Check if Ctrl is also pressed for transparency adjustment
+                if (GetAsyncKeyState(VK_CONTROL) & KEY_PRESSED_FLAG)
+                {
+                    if (handleTransparency(pMouse))
+                    {
+                        g_shouldConsumeWin = true;
+                        return 1; // Consume the mouse-scroll to prevent propagation
+                    }
+                }
+                else
+                {
+                    // The event was handled (and not throttled), so consume it
+                    if (handleMouseWheel(pMouse))
+                        g_shouldConsumeWin = true;
+                }
                 break;
             }
         }
