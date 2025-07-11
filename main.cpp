@@ -6,14 +6,23 @@
 // CONSTANTS
 // ---------
 
+// Flag for when a key is pressed
 const int KEY_PRESSED_FLAG = 0x8000;
+
+// A window cannot be resized below this many pixels
 const int MIN_WINDOW_SIZE = 100;
 
 // GLOBAL VARIABLES
 // ----------------
 
-/// Global variable to store the mouse-hook handle
+// Global variable to store the mouse-hook handle
 HHOOK g_mouseHook;
+
+// Global variable to store the keyboard-hook handle
+HHOOK g_keyboardHook;
+
+// Indicates if we should consume the Win key after a successful `winctrl` action
+bool g_shouldConsumeWin = false;
 
 // MouseProc Callback
 // ------------------
@@ -36,11 +45,13 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             // Left button down
             case WM_LBUTTONDOWN:
                 startDragging(pMouse);
+                g_shouldConsumeWin = true;
                 break;
 
             // Middle button down
             case WM_MBUTTONDOWN:
                 startResizing(pMouse);
+                g_shouldConsumeWin = true;
                 break;
 
             // Mouse move
@@ -65,7 +76,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             case WM_MOUSEWHEEL:
                 // The event was handled (and not throttled), so consume it
                 if (handleMouseWheel(pMouse))
-                    return 1;
+                    g_shouldConsumeWin = true;
                 break;
             }
         }
@@ -74,21 +85,59 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(g_mouseHook, nCode, wParam, lParam);
 }
 
+// KeyboardProc Callback
+// ---------------------
+
+// This callback procedure, when registered, is called whenever windows sends a keyboard event
+LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    if (nCode == HC_ACTION)
+    {
+        KBDLLHOOKSTRUCT *pKeyboard = (KBDLLHOOKSTRUCT *)lParam;
+
+        // Whenever we release the Windows key...
+        if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)
+        {
+            // Check to see if we triggered a winctrl shortcut, indicating that we need to consume the Win key release
+            if (pKeyboard->vkCode == VK_LWIN && g_shouldConsumeWin)
+            {
+                // Send an Esc key to consume the held-down Win key
+                INPUT input = {0};
+                input.type = INPUT_KEYBOARD;
+                input.ki.wVk = VK_ESCAPE;
+                SendInput(1, &input, sizeof(INPUT));
+                g_shouldConsumeWin = false; // Reset the flag for future operations
+            }
+        }
+    }
+
+    return CallNextHookEx(g_keyboardHook, nCode, wParam, lParam);
+}
+
 // SETUP AND TEARDOWN
 // ------------------
 
+// Setup low-level mouse and keyboard hooks. This tells Windows to call our
+// MouseProc/KeyProc callback functions for every mouse/keyboard event
 bool setupMouseHook()
 {
     g_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseProc, NULL, 0);
-    return g_mouseHook != NULL;
+    g_keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
+    return g_mouseHook != NULL && g_keyboardHook != NULL;
 }
 
-void teardownMouseHook()
+// Cleanup all registered hooks before exiting the application
+void teardownHooks()
 {
     if (g_mouseHook)
     {
         UnhookWindowsHookEx(g_mouseHook);
         g_mouseHook = NULL;
+    }
+    if (g_keyboardHook)
+    {
+        UnhookWindowsHookEx(g_keyboardHook);
+        g_keyboardHook = NULL;
     }
 }
 
@@ -98,9 +147,12 @@ void teardownMouseHook()
 /// Main entrypoint of the application
 int main()
 {
-    // Set a low-level mouse hook. This tells Windows to call our MouseProc function for every mouse event
+    // Register keyboard and mouse hooks
     if (!setupMouseHook())
-        return 1; // Mouse hook failed
+    {
+        std::cerr << "Failed to setup hooks!" << std::endl;
+        return EXIT_FAILURE;
+    }
 
     // A message loop to keep our program running in the background listening for events
     // This is essential for our hook to work
@@ -112,7 +164,7 @@ int main()
     }
 
     // Unhook before exiting. This is crucial for cleanup
-    teardownMouseHook();
+    teardownHooks();
 
-    return 0;
+    return EXIT_SUCCESS;
 }
