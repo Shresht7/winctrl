@@ -75,8 +75,14 @@ void startDragging(MSLLHOOKSTRUCT *pMouse)
     s_initialMousePos = pMouse->pt; // Store the initial mouse position
 }
 
-void stopDragging()
+void stopDragging(MSLLHOOKSTRUCT *pMouse)
 {
+    // If the window was dragged to the top edge, maximize it
+    if (s_isDragging && pMouse->pt.y == 0)
+    {
+        ShowWindow(s_draggedWindow, SW_MAXIMIZE);
+    }
+
     s_isDragging = false;   // Stop dragging. This will prevent the WM_MOUSEMOVE logic from running until the next drag starts
     s_draggedWindow = NULL; // Reset the dragged window handle
 }

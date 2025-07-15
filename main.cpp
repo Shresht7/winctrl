@@ -61,7 +61,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
             // Left button up
             case WM_LBUTTONUP:
-                stopDragging();
+                stopDragging(pMouse);
                 break;
 
             // Middle button up
