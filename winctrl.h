@@ -29,5 +29,6 @@ bool handleTransparency(MSLLHOOKSTRUCT *pMouse);
 // HELPER FUNCTIONS
 
 bool isExcludedWindow(HWND hWnd);
+bool isFullscreen(HWND hWnd);
 
 #endif // WINCTRL_H
