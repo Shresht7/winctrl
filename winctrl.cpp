@@ -59,10 +59,15 @@ void startDragging(MSLLHOOKSTRUCT *pMouse)
     s_draggedWindow = GetAncestor(hWnd, GA_ROOT); // Get its top-level window
 
     // If the window is excluded, abort the operation
-    if (isExcludedWindow(s_draggedWindow) || isFullscreen(s_draggedWindow))
+    if (isExcludedWindow(s_draggedWindow))
     {
         s_draggedWindow = NULL; // Reset the dragged window handle
         return;
+    }
+
+    if (isFullscreen(s_draggedWindow))
+    {
+        ShowWindow(s_draggedWindow, SW_RESTORE);
     }
 
     s_isDragging = true;            // Start dragging
