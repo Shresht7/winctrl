@@ -11,7 +11,7 @@ bool isResizing();
 // MOVE ACTIONS
 
 void startDragging(MSLLHOOKSTRUCT *pMouse);
-void stopDragging();
+void stopDragging(MSLLHOOKSTRUCT *pMouse);
 void performDrag(MSLLHOOKSTRUCT *pMouse);
 
 // RESIZE ACTIONS
