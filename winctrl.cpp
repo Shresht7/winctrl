@@ -59,7 +59,7 @@ void startDragging(MSLLHOOKSTRUCT *pMouse)
     s_draggedWindow = GetAncestor(hWnd, GA_ROOT); // Get its top-level window
 
     // If the window is excluded, abort the operation
-    if (isExcludedWindow(s_draggedWindow))
+    if (isExcludedWindow(s_draggedWindow) || isFullscreen(s_draggedWindow))
     {
         s_draggedWindow = NULL; // Reset the dragged window handle
         return;
@@ -109,7 +109,7 @@ void startResizing(MSLLHOOKSTRUCT *pMouse)
     s_draggedWindow = GetAncestor(hWnd, GA_ROOT); // Get its top-level window
 
     // If the window is excluded, abort the operation
-    if (isExcludedWindow(s_draggedWindow))
+    if (isExcludedWindow(s_draggedWindow) || isFullscreen(s_draggedWindow))
     {
         s_draggedWindow = NULL; // Reset the dragged window handle
         return;
@@ -404,4 +404,32 @@ bool isExcludedWindow(HWND hWnd)
     }
 
     return false;
+}
+
+bool isFullscreen(HWND hWnd)
+{
+    if (hWnd == NULL)
+    {
+        return false;
+    }
+
+    // Get the window style
+    LONG style = GetWindowLong(hWnd, GWL_STYLE);
+
+    // Check if it's a borderless window
+    if ((style & WS_CAPTION) == 0 && (style & WS_THICKFRAME) == 0)
+    {
+        // For borderless windows, check if the window size matches the screen size
+        RECT windowRect;
+        GetWindowRect(hWnd, &windowRect);
+
+        int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+        int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+        return windowRect.left == 0 && windowRect.top == 0 &&
+               windowRect.right == screenWidth && windowRect.bottom == screenHeight;
+    }
+
+    // For bordered windows, check if the window is maximized
+    return IsZoomed(hWnd);
 }
