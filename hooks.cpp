@@ -11,14 +11,14 @@ const int KEY_PRESSED_FLAG = 0x8000;
 // GLOBAL VARIABLES
 // ----------------
 
-// Global variable to store the mouse-hook handle
-HHOOK g_mouseHook;
+// The mouse-hook handle
+static HHOOK s_mouseHook;
 
-// Global variable to store the keyboard-hook handle
-HHOOK g_keyboardHook;
+// The keyboard-hook handle
+static HHOOK s_keyboardHook;
 
 // Indicates if we should consume the Win key after a successful `winctrl` action
-bool g_shouldConsumeWin = false;
+static bool s_shouldConsumeWin = false;
 
 // MouseProc Callback
 // ------------------
@@ -41,13 +41,13 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             // Left button down
             case WM_LBUTTONDOWN:
                 startDragging(pMouse);
-                g_shouldConsumeWin = true;
+                s_shouldConsumeWin = true;
                 break;
 
             // Middle button down
             case WM_MBUTTONDOWN:
                 startResizing(pMouse);
-                g_shouldConsumeWin = true;
+                s_shouldConsumeWin = true;
                 break;
 
             // Mouse move
@@ -75,7 +75,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 {
                     if (handleTransparency(pMouse))
                     {
-                        g_shouldConsumeWin = true;
+                        s_shouldConsumeWin = true;
                         return 1; // Consume the mouse-scroll to prevent propagation
                     }
                 }
@@ -84,14 +84,14 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 {
                     // The event was handled (and not throttled), so consume it
                     if (handleMouseWheel(pMouse))
-                        g_shouldConsumeWin = true;
+                        s_shouldConsumeWin = true;
                 }
                 break;
             }
         }
     }
 
-    return CallNextHookEx(g_mouseHook, nCode, wParam, lParam);
+    return CallNextHookEx(s_mouseHook, nCode, wParam, lParam);
 }
 
 // KeyboardProc Callback
@@ -108,19 +108,19 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
         if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)
         {
             // Check to see if we triggered a winctrl shortcut, indicating that we need to consume the Win key release
-            if (pKeyboard->vkCode == VK_LWIN && g_shouldConsumeWin)
+            if (pKeyboard->vkCode == VK_LWIN && s_shouldConsumeWin)
             {
                 // Send an Esc key to consume the held-down Win key
                 INPUT input = {0};
                 input.type = INPUT_KEYBOARD;
                 input.ki.wVk = VK_ESCAPE;
                 SendInput(1, &input, sizeof(INPUT));
-                g_shouldConsumeWin = false; // Reset the flag for future operations
+                s_shouldConsumeWin = false; // Reset the flag for future operations
             }
         }
     }
 
-    return CallNextHookEx(g_keyboardHook, nCode, wParam, lParam);
+    return CallNextHookEx(s_keyboardHook, nCode, wParam, lParam);
 }
 
 // SETUP AND TEARDOWN
@@ -130,22 +130,22 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 // MouseProc/KeyProc callback functions for every mouse/keyboard event
 bool setupHooks()
 {
-    g_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseProc, NULL, 0);
-    g_keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
-    return g_mouseHook != NULL && g_keyboardHook != NULL;
+    s_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseProc, NULL, 0);
+    s_keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
+    return s_mouseHook != NULL && s_keyboardHook != NULL;
 }
 
 // Cleanup all registered hooks before exiting the application
 void teardownHooks()
 {
-    if (g_mouseHook)
+    if (s_mouseHook)
     {
-        UnhookWindowsHookEx(g_mouseHook);
-        g_mouseHook = NULL;
+        UnhookWindowsHookEx(s_mouseHook);
+        s_mouseHook = NULL;
     }
-    if (g_keyboardHook)
+    if (s_keyboardHook)
     {
-        UnhookWindowsHookEx(g_keyboardHook);
-        g_keyboardHook = NULL;
+        UnhookWindowsHookEx(s_keyboardHook);
+        s_keyboardHook = NULL;
     }
 }
