@@ -69,6 +69,7 @@
 				"kind": "build"
 			},
 			"dependsOn": [
+				"🛑Stop winctrl.exe",
 				"📦Build Resources"
 			]
 		},
@@ -97,6 +98,7 @@
 			],
 			"group": "build",
 			"dependsOn": [
+				"🛑Stop winctrl_tray.exe",
 				"📦Build Resources"
 			]
 		},
@@ -105,6 +107,9 @@
 			"type": "shell",
 			"command": ".\\winctrl.exe",
 			"group": "test",
+			"dependsOn": [
+				"🛑Stop winctrl.exe"
+			],
 			"options": {
 				"shell": {
 					"args": [
@@ -118,6 +123,9 @@
 			"type": "shell",
 			"command": ".\\winctrl_tray.exe",
 			"group": "test",
+			"dependsOn": [
+				"🛑Stop winctrl_tray.exe"
+			],
 			"options": {
 				"shell": {
 					"args": [
@@ -126,5 +134,48 @@
 				}
 			}
 		},
+		{
+			"type": "shell",
+			"label": "🛑Stop winctrl.exe",
+			"command": "Get-Process -Name winctrl -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue || $true",
+			"group": "test",
+			"options": {
+				"shell": {
+					"args": [
+						"-NoProfile"
+					]
+				}
+			}
+		},
+		{
+			"type": "shell",
+			"label": "🛑Stop winctrl_tray.exe",
+			"command": "Get-Process -Name winctrl_tray -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue || $true",
+			"group": "test",
+			"options": {
+				"shell": {
+					"args": [
+						"-NoProfile"
+					]
+				}
+			}
+		},
+		{
+			"type": "shell",
+			"label": "🛑Stop all winctrl processes",
+			"command": "echo 'Stopping both processes...'",
+			"group": "test",
+			"dependsOn": [
+				"🛑Stop winctrl.exe",
+				"🛑Stop winctrl_tray.exe"
+			],
+			"options": {
+				"shell": {
+					"args": [
+						"-NoProfile"
+					]
+				}
+			}
+		}
 	]
 }
