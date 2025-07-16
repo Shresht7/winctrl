@@ -11,6 +11,7 @@
 				"main.cpp",
 				"hooks.cpp",
 				"winctrl.cpp",
+				"helpers.cpp",
 				"-o",
 				"winctrl.exe",
 				"-luser32",
