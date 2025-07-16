@@ -1,6 +1,7 @@
 #include <iostream>
 #include <windows.h>
 #include <cmath>
+
 #include "winctrl.h"
 
 // CONSTANTS
@@ -80,6 +81,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                         return 1; // Consume the mouse-scroll to prevent propagation
                     }
                 }
+                // Otherwise, scroll through the virtual desktops
                 else
                 {
                     // The event was handled (and not throttled), so consume it
@@ -128,7 +130,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 
 // Setup low-level mouse and keyboard hooks. This tells Windows to call our
 // MouseProc/KeyProc callback functions for every mouse/keyboard event
-bool setupMouseHook()
+bool setupHooks()
 {
     g_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseProc, NULL, 0);
     g_keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
@@ -157,7 +159,7 @@ void teardownHooks()
 int main()
 {
     // Register keyboard and mouse hooks
-    if (!setupMouseHook())
+    if (!setupHooks())
     {
         std::cerr << "Failed to setup hooks!" << std::endl;
         return EXIT_FAILURE;
