@@ -14,6 +14,20 @@ extern bool s_isLeftMouseButtonDown;
 extern std::chrono::steady_clock::time_point s_isLeftMouseButtonDownTime;
 extern POINT s_isLeftMouseButtonDownPos;
 
+// FEATURE TOGGLES
+extern bool s_isWinCtrlPaused;
+extern bool s_isDraggingEnabled;
+extern bool s_isResizingEnabled;
+extern bool s_isTransparencyEnabled;
+extern bool s_isVirtualDesktopSwitchingEnabled;
+
+// FEATURE TOGGLE FUNCTIONS
+void toggleWinCtrlPaused();
+void toggleDraggingEnabled();
+void toggleResizingEnabled();
+void toggleTransparencyEnabled();
+void toggleVirtualDesktopSwitchingEnabled();
+
 bool isDragging();
 bool isResizing();
 

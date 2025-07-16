@@ -6,6 +6,7 @@
 #include <iostream>   // For std::cerr, though for a GUI app, error logging might go elsewhere
 
 #include "hooks.h"
+#include "winctrl.h"
 
 // Custom message for tray icon notifications
 #define WM_TRAYICON (WM_USER + 1)
@@ -58,15 +59,23 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         switch (LOWORD(lParam))
         {
         case WM_LBUTTONUP:
-            // Left click on tray icon - could show a menu or bring up a window
+            MessageBox(hWnd, L"WinCtrl is running in the background.\n\nRight-click the tray icon for options.", L"WinCtrl", MB_OK | MB_ICONINFORMATION);
             break;
         case WM_RBUTTONUP:
         {
-            // Right click on tray icon - show context menu
             POINT curPoint;
             GetCursorPos(&curPoint);
 
             HMENU hMenu = CreatePopupMenu();
+
+            // Add feature toggles
+            AppendMenu(hMenu, MF_STRING | (s_isWinCtrlPaused ? MF_CHECKED : MF_UNCHECKED), 1002, L"Pause WinCtrl");
+            AppendMenu(hMenu, MF_STRING | (s_isDraggingEnabled ? MF_CHECKED : MF_UNCHECKED), 1003, L"Enable Dragging");
+            AppendMenu(hMenu, MF_STRING | (s_isResizingEnabled ? MF_CHECKED : MF_UNCHECKED), 1004, L"Enable Resizing");
+            AppendMenu(hMenu, MF_STRING | (s_isTransparencyEnabled ? MF_CHECKED : MF_UNCHECKED), 1005, L"Enable Transparency");
+            AppendMenu(hMenu, MF_STRING | (s_isVirtualDesktopSwitchingEnabled ? MF_CHECKED : MF_UNCHECKED), 1006, L"Enable Virtual Desktop Switching");
+
+            AppendMenu(hMenu, MF_SEPARATOR, 0, NULL); // Separator
             AppendMenu(hMenu, MF_STRING, 1001, L"Exit"); // Menu item with ID 1001
 
             // Set the foreground window to our window so the menu disappears when focus is lost
@@ -84,9 +93,26 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_COMMAND:
-        if (LOWORD(wParam) == 1001) // "Exit" menu item clicked
+        switch (LOWORD(wParam))
         {
-            PostQuitMessage(0); // Terminate the application
+        case 1001: // "Exit" menu item clicked
+            PostQuitMessage(0);
+            break;
+        case 1002: // "Pause WinCtrl" clicked
+            toggleWinCtrlPaused();
+            break;
+        case 1003: // "Enable Dragging" clicked
+            toggleDraggingEnabled();
+            break;
+        case 1004: // "Enable Resizing" clicked
+            toggleResizingEnabled();
+            break;
+        case 1005: // "Enable Transparency" clicked
+            toggleTransparencyEnabled();
+            break;
+        case 1006: // "Enable Virtual Desktop Switching" clicked
+            toggleVirtualDesktopSwitchingEnabled();
+            break;
         }
         break;
 
