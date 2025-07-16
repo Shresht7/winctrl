@@ -41,16 +41,28 @@ This application uses a low-level global mouse hook to intercept all mouse event
 
 ## Development
 
-### Build
+### Build (Console Application)
 
 ```
-g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl.exe -luser32
+g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl.exe -luser32 -mconsole
 ```
 
-### Release
+### Build (Tray Application)
+
+```
+g++ src/tray.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl_tray.exe -luser32 -mwindows
+```
+
+### Release (Console Application)
 
 ```
 g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl.exe -luser32 -mwindows
+```
+
+### Release (Tray Application)
+
+```
+g++ src/tray.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl_tray.exe -luser32 -mwindows
 ```
 
 #### Flags
