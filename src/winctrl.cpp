@@ -39,6 +39,10 @@ enum ResizeRegion
 /// Determines the corner or edge to resize from
 static ResizeRegion s_activeResizeRegion = NONE;
 
+bool s_isMiddleMouseButtonDown = false;
+std::chrono::steady_clock::time_point s_middleMouseButtonDownTime;
+POINT s_middleMouseButtonDownPos;
+
 // DRAG
 // ----
 

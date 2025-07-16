@@ -46,12 +46,9 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
             // Middle button down
             case WM_MBUTTONDOWN:
-                // If we are not currently resizing, then this is a tap
-                if (!isResizing())
-                    toggleMaximizeRestore(pMouse);
-                // Otherwise, start resizing
-                else
-                    startResizing(pMouse);
+                s_isMiddleMouseButtonDown = true;
+                s_middleMouseButtonDownTime = std::chrono::steady_clock::now();
+                s_middleMouseButtonDownPos = pMouse->pt;
                 s_shouldConsumeWin = true;
                 break;
 
@@ -61,6 +58,17 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                     performDrag(pMouse);
                 else if (isResizing())
                     performResize(pMouse);
+                else if (s_isMiddleMouseButtonDown)
+                {
+                    // If middle button is down and we are not yet resizing, check for movement to start resizing
+                    const int DRAG_THRESHOLD = 5; // Pixels
+                    if (abs(pMouse->pt.x - s_middleMouseButtonDownPos.x) > DRAG_THRESHOLD ||
+                        abs(pMouse->pt.y - s_middleMouseButtonDownPos.y) > DRAG_THRESHOLD)
+                    {
+                        startResizing(pMouse);
+                        s_shouldConsumeWin = true;
+                    }
+                }
                 break;
 
             // Left button up
@@ -71,6 +79,22 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             // Middle button up
             case WM_MBUTTONUP:
                 stopResizing();
+                if (s_isMiddleMouseButtonDown)
+                {
+                    s_isMiddleMouseButtonDown = false;
+                    auto now = std::chrono::steady_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - s_middleMouseButtonDownTime).count();
+                    // Define a click threshold (e.g., 200 milliseconds)
+                    const int CLICK_THRESHOLD_MS = 200;
+
+                    // Check if it was a click (short duration) and no resizing occurred
+                    if (duration < CLICK_THRESHOLD_MS && !isResizing() &&
+                        (abs(pMouse->pt.x - s_middleMouseButtonDownPos.x) < 5 &&
+                         abs(pMouse->pt.y - s_middleMouseButtonDownPos.y) < 5))
+                    {
+                        toggleMaximizeRestore(pMouse);
+                    }
+                }
                 break;
 
             // Mouse Wheel Scroll

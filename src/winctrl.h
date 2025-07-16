@@ -2,8 +2,13 @@
 #define WINCTRL_H
 
 #include <windows.h>
+#include <chrono>
 
 // STATE
+
+extern bool s_isMiddleMouseButtonDown;
+extern std::chrono::steady_clock::time_point s_middleMouseButtonDownTime;
+extern POINT s_middleMouseButtonDownPos;
 
 bool isDragging();
 bool isResizing();
