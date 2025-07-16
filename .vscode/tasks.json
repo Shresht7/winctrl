@@ -4,7 +4,7 @@
 		{
 			"label": "📦Build All",
 			"type": "shell",
-			"command": "echo Building both executables...",
+			"command": "echo 'Building both executables...'",
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -12,14 +12,21 @@
 			"dependsOn": [
 				"📦Build winctrl.exe (Console)",
 				"📦Build winctrl_tray.exe (System Tray)"
-			]
+			],
+			"options": {
+				"shell": {
+					"args": [
+						"-NoProfile"
+					]
+				}
+			}
 		},
 		{
 			"label": "📦Build Resources",
 			"type": "shell",
 			"command": "windres",
 			"args": [
-				".\\resources\\winctrl.rc",
+				".\\src\\resources.rc",
 				"-O",
 				"coff",
 				"-o",
@@ -62,7 +69,6 @@
 				"kind": "build"
 			},
 			"dependsOn": [
-				"🛑Stop winctrl.exe",
 				"📦Build Resources"
 			]
 		},
@@ -91,7 +97,6 @@
 			],
 			"group": "build",
 			"dependsOn": [
-				"🛑Stop winctrl_tray.exe",
 				"📦Build Resources"
 			]
 		},
@@ -106,10 +111,7 @@
 						"-NoProfile"
 					]
 				}
-			},
-			"dependsOn": [
-				"🛑Stop winctrl.exe"
-			]
+			}
 		},
 		{
 			"label": "🚀Run winctrl_tray.exe",
@@ -122,48 +124,7 @@
 						"-NoProfile"
 					]
 				}
-			},
-			"dependsOn": [
-				"🛑Stop winctrl_tray.exe"
-			]
-		},
-		{
-			"label": "🛑Stop winctrl.exe",
-			"type": "shell",
-			"command": "Get-Process -Name \"winctrl\" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue",
-			"group": "none",
-			"problemMatcher": [],
-			"options": {
-				"shell": {
-					"args": [
-						"-NoProfile"
-					]
-				}
 			}
-		},
-		{
-			"label": "🛑Stop winctrl_tray.exe",
-			"type": "shell",
-			"command": "Get-Process -Name \"winctrl_tray\" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue",
-			"group": "none",
-			"problemMatcher": [],
-			"options": {
-				"shell": {
-					"args": [
-						"-NoProfile"
-					]
-				}
-			}
-		},
-		{
-			"label": "🛑Stop All winctrl Processes",
-			"type": "shell",
-			"command": "echo Stopping all winctrl processes...",
-			"group": "none",
-			"dependsOn": [
-				"🛑Stop winctrl.exe",
-				"🛑Stop winctrl_tray.exe"
-			]
 		},
 	]
 }
