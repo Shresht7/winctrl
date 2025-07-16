@@ -5,7 +5,10 @@
 			"label": "📦Build All",
 			"type": "shell",
 			"command": "echo Building both executables...",
-			"group": "build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
 			"dependsOn": [
 				"📦Build winctrl.exe (Console)",
 				"📦Build winctrl_tray.exe (System Tray)"
@@ -22,10 +25,7 @@
 				"-o",
 				"resources\\winctrl.res"
 			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"group": "build",
 			"problemMatcher": [],
 			"options": {
 				"shell": {
