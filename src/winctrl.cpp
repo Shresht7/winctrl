@@ -375,3 +375,26 @@ bool handleTransparency(MSLLHOOKSTRUCT *pMouse)
 
     return true; // Event handled
 }
+
+// MAXIMIZE/RESTORE ACTIONS
+// ------------------------
+
+void toggleMaximizeRestore(MSLLHOOKSTRUCT *pMouse)
+{
+    HWND hWnd = WindowFromPoint(pMouse->pt);
+    HWND targetWnd = GetAncestor(hWnd, GA_ROOT);
+
+    if (isExcludedWindow(targetWnd))
+    {
+        return;
+    }
+
+    if (IsZoomed(targetWnd))
+    {
+        ShowWindow(targetWnd, SW_RESTORE);
+    }
+    else
+    {
+        ShowWindow(targetWnd, SW_MAXIMIZE);
+    }
+}

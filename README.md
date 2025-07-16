@@ -6,6 +6,7 @@ GNOME like mouse-centric window management on Windows.
 
 - **Move Windows**: Hold down the <kbd>Win</kbd> key and drag a window with the `Left Mouse Button` to move it. You don't have to target the titlebar!
   - **Maximize on Top**: Dragging a window to the very top edge of the screen will maximize it.
+- **Maximize/Restore Window**: Hold down the <kbd>Win</kbd> key and *tap* the `Middle Mouse Button` to toggle between maximized and restored states for the window under the cursor.
 - **Resize Windows**: Hold down the <kbd>Win</kbd> key and drag with the `Middle Mouse Button`. Resizing is directional based on where you click:
   - **Edges**: Dragging from a window's side or top/bottom edge resizes along that axis.
   - **Corners**: Dragging from a corner resizes both height and width.

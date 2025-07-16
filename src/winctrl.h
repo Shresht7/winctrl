@@ -20,6 +20,10 @@ void startResizing(MSLLHOOKSTRUCT *pMouse);
 void stopResizing();
 void performResize(MSLLHOOKSTRUCT *pMouse);
 
+// MAXIMIZE/RESTORE ACTIONS
+
+void toggleMaximizeRestore(MSLLHOOKSTRUCT *pMouse);
+
 // VIRTUAL DESKTOP
 
 bool handleMouseWheel(MSLLHOOKSTRUCT *pMouse);

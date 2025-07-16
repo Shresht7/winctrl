@@ -46,7 +46,12 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
             // Middle button down
             case WM_MBUTTONDOWN:
-                startResizing(pMouse);
+                // If we are not currently resizing, then this is a tap
+                if (!isResizing())
+                    toggleMaximizeRestore(pMouse);
+                // Otherwise, start resizing
+                else
+                    startResizing(pMouse);
                 s_shouldConsumeWin = true;
                 break;
 
