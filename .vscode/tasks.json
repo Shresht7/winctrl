@@ -16,11 +16,11 @@
 			"type": "shell",
 			"command": "windres",
 			"args": [
-				".\\src\\winctrl.rc",
+				".\\resources\\winctrl.rc",
 				"-O",
 				"coff",
 				"-o",
-				"winctrl.res"
+				"resources\\winctrl.res"
 			],
 			"group": {
 				"kind": "build",
@@ -46,7 +46,7 @@
 				"src/hooks.cpp",
 				"src/winctrl.cpp",
 				"src/helpers.cpp",
-				"winctrl.res",
+				"resources/winctrl.res",
 				"-o",
 				"winctrl.exe",
 				"-luser32",
@@ -77,7 +77,7 @@
 				"src/hooks.cpp",
 				"src/winctrl.cpp",
 				"src/helpers.cpp",
-				"winctrl.res",
+				"resources/winctrl.res",
 				"-o",
 				"winctrl_tray.exe",
 				"-luser32",
