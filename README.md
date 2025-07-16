@@ -47,10 +47,10 @@ This application uses a low-level global mouse hook to intercept all mouse event
 
 ### Adding an Icon
 
-To embed an icon (e.g., `resources/icon.ico`) into your executable, first create a resource script file (e.g., `resources/winctrl.rc`) with the line `IDI_ICON1 ICON "resources/icon.ico"`. Then, compile it using `windres`:
+To embed an icon (e.g., `resources/icon.ico`) into your executable, first create a resource script file (e.g., `src/resources.rc`) with the line `IDI_ICON1 ICON "resources/icon.ico"`. Then, compile it using `windres`:
 
 ```bash
-windres resources/winctrl.rc -O coff -o resources/winctrl.res
+windres src/resources.rc -O coff -o resources/winctrl.res
 ```
 
 Finally, include `resources/winctrl.res` in your `g++` compilation command (e.g., `g++ ... resources/winctrl.res -o winctrl.exe ...`).

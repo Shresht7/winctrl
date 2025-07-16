@@ -7,6 +7,7 @@
 
 #include "hooks.h"
 #include "winctrl.h"
+#include "resources.h"
 
 // Custom message for tray icon notifications
 #define WM_TRAYICON (WM_USER + 1)
@@ -26,7 +27,7 @@ void AddTrayIcon(HWND hWnd)
     nid.uID = 1; // Icon ID
     nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     nid.uCallbackMessage = WM_TRAYICON;
-    nid.hIcon = LoadIcon(NULL, IDI_APPLICATION); // Default application icon
+    nid.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1)); // Load custom icon
     lstrcpy(nid.szTip, L"WinCtrl - Window Management");
 
     Shell_NotifyIcon(NIM_ADD, &nid);
@@ -75,7 +76,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             AppendMenu(hMenu, MF_STRING | (s_isTransparencyEnabled ? MF_CHECKED : MF_UNCHECKED), 1005, L"Enable Transparency");
             AppendMenu(hMenu, MF_STRING | (s_isVirtualDesktopSwitchingEnabled ? MF_CHECKED : MF_UNCHECKED), 1006, L"Enable Virtual Desktop Switching");
 
-            AppendMenu(hMenu, MF_SEPARATOR, 0, NULL); // Separator
+            AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);    // Separator
             AppendMenu(hMenu, MF_STRING, 1001, L"Exit"); // Menu item with ID 1001
 
             // Set the foreground window to our window so the menu disappears when focus is lost
