@@ -59,7 +59,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         switch (LOWORD(lParam))
         {
         case WM_LBUTTONUP:
-            MessageBox(hWnd, L"WinCtrl is running in the background.\n\nRight-click the tray icon for options.", L"WinCtrl", MB_OK | MB_ICONINFORMATION);
+            MessageBox(hWnd, L"WinCtrl is running in the background.\n\nFeatures:\n- Win + Left-click: Maximize/Restore\n- Win + Left-hold-move: Drag Window\n- Win + Middle-hold-move: Resize Window\n- Win + Ctrl + Scroll: Adjust Transparency\n- Win + Scroll: Switch Virtual Desktop\n\nRight-click the tray icon for more options and to toggle features.", L"WinCtrl", MB_OK | MB_ICONINFORMATION);
             break;
         case WM_RBUTTONUP:
         {
