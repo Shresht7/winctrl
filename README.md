@@ -41,28 +41,38 @@ This application uses a low-level global mouse hook to intercept all mouse event
 
 ## Development
 
+### Adding an Icon
+
+To embed an icon (e.g., `resources/icon.ico`) into your executable, first create a resource script file (e.g., `src/winctrl.rc`) with the line `IDI_ICON1 ICON "resources/icon.ico"`. Then, compile it using `windres`:
+
+```bash
+windres src/winctrl.rc -O coff -o winctrl.res
+```
+
+Finally, include `winctrl.res` in your `g++` compilation command (e.g., `g++ ... winctrl.res -o winctrl.exe ...`).
+
 ### Build (Console Application)
 
 ```
-g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl.exe -luser32 -mconsole
+g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp winctrl.res -o winctrl.exe -luser32 -mconsole
 ```
 
 ### Build (Tray Application)
 
 ```
-g++ src/tray.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl_tray.exe -luser32 -mwindows
+g++ src/tray.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp winctrl.res -o winctrl_tray.exe -luser32 -mwindows
 ```
 
 ### Release (Console Application)
 
 ```
-g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl.exe -luser32 -mwindows
+g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp winctrl.res -o winctrl.exe -luser32 -mwindows
 ```
 
 ### Release (Tray Application)
 
 ```
-g++ src/tray.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl_tray.exe -luser32 -mwindows
+g++ src/tray.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp winctrl.res -o winctrl_tray.exe -luser32 -mwindows
 ```
 
 #### Flags
