@@ -2,8 +2,42 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "📦Build All",
+			"type": "shell",
+			"command": "echo Building both executables...",
+			"group": "build",
+			"dependsOn": [
+				"📦Build winctrl.exe (Console)",
+				"📦Build winctrl_tray.exe (System Tray)"
+			]
+		},
+		{
+			"label": "📦Build Resources",
+			"type": "shell",
+			"command": "windres",
+			"args": [
+				".\\src\\winctrl.rc",
+				"-O",
+				"coff",
+				"-o",
+				"winctrl.res"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"options": {
+				"shell": {
+					"args": [
+						"-NoProfile"
+					]
+				}
+			}
+		},
+		{
+			"label": "📦Build winctrl.exe (Console)",
 			"type": "cppbuild",
-			"label": "📦Build",
 			"command": "g++.exe",
 			"args": [
 				"-fdiagnostics-color=always",
@@ -12,6 +46,7 @@
 				"src/hooks.cpp",
 				"src/winctrl.cpp",
 				"src/helpers.cpp",
+				"winctrl.res",
 				"-o",
 				"winctrl.exe",
 				"-luser32",
@@ -24,15 +59,111 @@
 				"$gcc"
 			],
 			"group": {
-				"kind": "build",
-				"isDefault": true
+				"kind": "build"
 			},
-			"detail": "compiler: g++.exe"
+			"dependsOn": [
+				"🛑Stop winctrl.exe",
+				"📦Build Resources"
+			]
 		},
 		{
+			"label": "📦Build winctrl_tray.exe (System Tray)",
+			"type": "cppbuild",
+			"command": "g++.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-g",
+				"src/tray.cpp",
+				"src/hooks.cpp",
+				"src/winctrl.cpp",
+				"src/helpers.cpp",
+				"winctrl.res",
+				"-o",
+				"winctrl_tray.exe",
+				"-luser32",
+				"-mwindows"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"dependsOn": [
+				"🛑Stop winctrl_tray.exe",
+				"📦Build Resources"
+			]
+		},
+		{
+			"label": "🚀Run winctrl.exe",
 			"type": "shell",
-			"label": "🚀Run",
 			"command": ".\\winctrl.exe",
-		}
+			"group": "test",
+			"options": {
+				"shell": {
+					"args": [
+						"-NoProfile"
+					]
+				}
+			},
+			"dependsOn": [
+				"🛑Stop winctrl.exe"
+			]
+		},
+		{
+			"label": "🚀Run winctrl_tray.exe",
+			"type": "shell",
+			"command": ".\\winctrl_tray.exe",
+			"group": "test",
+			"options": {
+				"shell": {
+					"args": [
+						"-NoProfile"
+					]
+				}
+			},
+			"dependsOn": [
+				"🛑Stop winctrl_tray.exe"
+			]
+		},
+		{
+			"label": "🛑Stop winctrl.exe",
+			"type": "shell",
+			"command": "Get-Process -Name \"winctrl\" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue",
+			"group": "none",
+			"problemMatcher": [],
+			"options": {
+				"shell": {
+					"args": [
+						"-NoProfile"
+					]
+				}
+			}
+		},
+		{
+			"label": "🛑Stop winctrl_tray.exe",
+			"type": "shell",
+			"command": "Get-Process -Name \"winctrl_tray\" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue",
+			"group": "none",
+			"problemMatcher": [],
+			"options": {
+				"shell": {
+					"args": [
+						"-NoProfile"
+					]
+				}
+			}
+		},
+		{
+			"label": "🛑Stop All winctrl Processes",
+			"type": "shell",
+			"command": "echo Stopping all winctrl processes...",
+			"group": "none",
+			"dependsOn": [
+				"🛑Stop winctrl.exe",
+				"🛑Stop winctrl_tray.exe"
+			]
+		},
 	]
 }
