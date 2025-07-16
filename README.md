@@ -2,6 +2,10 @@
 
 GNOME like mouse-centric window management on Windows.
 
+<div align="center">
+  <img src="./resources/icon.svg" width="200">
+</div>
+
 ## Features
 
   - **Move Windows**: Hold down the <kbd>Win</kbd> key and drag a window with the `Left Mouse Button` (hold and drag) to move it. You don't have to target the titlebar!
