@@ -40,3 +40,5 @@
 # debug information files
 *.dwo
 
+# Ignore resource files
+*.res
