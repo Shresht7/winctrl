@@ -110,7 +110,9 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
             // Check to see if we triggered a winctrl shortcut, indicating that we need to consume the Win key release
             if (pKeyboard->vkCode == VK_LWIN && s_shouldConsumeWin)
             {
-                // Send an Esc key to consume the held-down Win key
+                // Note: Send an Esc key to consume the held-down Win key
+                //  This is to prevent the Start Menu from appearing, which would otherwise happen
+                //  because the system registers the Win key release.
                 INPUT input = {0};
                 input.type = INPUT_KEYBOARD;
                 input.ki.wVk = VK_ESCAPE;

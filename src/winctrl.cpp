@@ -221,13 +221,17 @@ void performResize(MSLLHOOKSTRUCT *pMouse)
     case CENTER:
     {
         // Resize from the center, maintaining aspect ratio based on vertical mouse movement
+        // We use 'dy' (vertical mouse movement) as the primary driver for size change.
         float aspectRatio = (float)newWidth / (float)newHeight;
-        int sizeChange = dy * 2; // Make resizing more sensitive
+        int sizeChange = dy * 2; // Multiply by 2 to make the resizing more sensitive
 
+        // Calculate new width and height based on the aspect ratio and size change.
+        // The width change is proportional to the height change, scaled by the aspect ratio.
         newWidth += (int)(sizeChange * aspectRatio);
         newHeight += sizeChange;
 
         // Reposition the window to keep its center stationary
+        // The adjustment is half of the total size change in each dimension.
         newX -= (int)((sizeChange * aspectRatio) / 2);
         newY -= sizeChange / 2;
         break;
@@ -261,6 +265,8 @@ static void simulateVirtualDesktopSwitch(bool scrollUp)
 {
     INPUT inputs[6] = {};
     ZeroMemory(inputs, sizeof(inputs));
+
+    // We simulate the virtual desktop switch by sending a sequence of key events (Win + Ctrl + Left/Right Arrow)
 
     // Press Win
     inputs[0].type = INPUT_KEYBOARD;
