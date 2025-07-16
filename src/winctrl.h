@@ -10,6 +10,10 @@ extern bool s_isMiddleMouseButtonDown;
 extern std::chrono::steady_clock::time_point s_middleMouseButtonDownTime;
 extern POINT s_middleMouseButtonDownPos;
 
+extern bool s_isLeftMouseButtonDown;
+extern std::chrono::steady_clock::time_point s_isLeftMouseButtonDownTime;
+extern POINT s_isLeftMouseButtonDownPos;
+
 bool isDragging();
 bool isResizing();
 

@@ -43,6 +43,10 @@ bool s_isMiddleMouseButtonDown = false;
 std::chrono::steady_clock::time_point s_middleMouseButtonDownTime;
 POINT s_middleMouseButtonDownPos;
 
+bool s_isLeftMouseButtonDown = false;
+std::chrono::steady_clock::time_point s_isLeftMouseButtonDownTime;
+POINT s_isLeftMouseButtonDownPos;
+
 // DRAG
 // ----
 

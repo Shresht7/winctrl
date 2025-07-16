@@ -40,7 +40,9 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
             {
             // Left button down
             case WM_LBUTTONDOWN:
-                startDragging(pMouse);
+                s_isLeftMouseButtonDown = true;
+                s_isLeftMouseButtonDownTime = std::chrono::steady_clock::now();
+                s_isLeftMouseButtonDownPos = pMouse->pt;
                 s_shouldConsumeWin = true;
                 break;
 
@@ -49,7 +51,6 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 s_isMiddleMouseButtonDown = true;
                 s_middleMouseButtonDownTime = std::chrono::steady_clock::now();
                 s_middleMouseButtonDownPos = pMouse->pt;
-                s_shouldConsumeWin = true;
                 break;
 
             // Mouse move
@@ -58,6 +59,17 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                     performDrag(pMouse);
                 else if (isResizing())
                     performResize(pMouse);
+                else if (s_isLeftMouseButtonDown)
+                {
+                    // If left button is down and we are not yet dragging, check for movement to start dragging
+                    const int DRAG_THRESHOLD = 5; // Pixels
+                    if (abs(pMouse->pt.x - s_isLeftMouseButtonDownPos.x) > DRAG_THRESHOLD ||
+                        abs(pMouse->pt.y - s_isLeftMouseButtonDownPos.y) > DRAG_THRESHOLD)
+                    {
+                        startDragging(pMouse);
+                        s_shouldConsumeWin = true;
+                    }
+                }
                 else if (s_isMiddleMouseButtonDown)
                 {
                     // If middle button is down and we are not yet resizing, check for movement to start resizing
@@ -73,28 +85,32 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
             // Left button up
             case WM_LBUTTONUP:
-                stopDragging(pMouse);
+                if (s_isLeftMouseButtonDown)
+                {
+                    s_isLeftMouseButtonDown = false;
+                    auto now = std::chrono::steady_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - s_isLeftMouseButtonDownTime).count();
+                    // Define a click threshold (e.g., 200 milliseconds)
+                    const int CLICK_THRESHOLD_MS = 200;
+
+                    // Check if it was a click (short duration) and no dragging occurred
+                    if (duration < CLICK_THRESHOLD_MS && !isDragging() &&
+                        (abs(pMouse->pt.x - s_isLeftMouseButtonDownPos.x) < 5 &&
+                         abs(pMouse->pt.y - s_isLeftMouseButtonDownPos.y) < 5))
+                    {
+                        toggleMaximizeRestore(pMouse);
+                    }
+                    else if (isDragging())
+                    {
+                        stopDragging(pMouse);
+                    }
+                }
                 break;
 
             // Middle button up
             case WM_MBUTTONUP:
                 stopResizing();
-                if (s_isMiddleMouseButtonDown)
-                {
-                    s_isMiddleMouseButtonDown = false;
-                    auto now = std::chrono::steady_clock::now();
-                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - s_middleMouseButtonDownTime).count();
-                    // Define a click threshold (e.g., 200 milliseconds)
-                    const int CLICK_THRESHOLD_MS = 200;
-
-                    // Check if it was a click (short duration) and no resizing occurred
-                    if (duration < CLICK_THRESHOLD_MS && !isResizing() &&
-                        (abs(pMouse->pt.x - s_middleMouseButtonDownPos.x) < 5 &&
-                         abs(pMouse->pt.y - s_middleMouseButtonDownPos.y) < 5))
-                    {
-                        toggleMaximizeRestore(pMouse);
-                    }
-                }
+                s_isMiddleMouseButtonDown = false;
                 break;
 
             // Mouse Wheel Scroll
