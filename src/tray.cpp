@@ -44,6 +44,19 @@ void DeleteTrayIcon(HWND hWnd)
     Shell_NotifyIcon(NIM_DELETE, &nid);
 }
 
+// HELP MESSAGE
+// ------------
+
+const wchar_t *helpMessage =
+    L"WinCtrl is running in the background.\n\n"
+    L"Features:\n"
+    L"- Win + Left Mouse Button Click: Maximize/Restore\n"
+    L"- Win + Left Mouse Button Drag: Drag Window\n"
+    L"- Win + Middle Mouse Button Drag: Resize Window\n"
+    L"- Win + Ctrl + Scroll: Adjust Transparency\n"
+    L"- Win + Scroll: Switch Virtual Desktop\n\n"
+    L"Right-click the tray icon for more options and to toggle features.";
+
 // WINDOW PROCEDURE
 // ----------------
 
@@ -60,7 +73,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         switch (LOWORD(lParam))
         {
         case WM_LBUTTONUP:
-            MessageBox(hWnd, L"WinCtrl is running in the background.\n\nFeatures:\n- Win + Left-click: Maximize/Restore\n- Win + Left-hold-move: Drag Window\n- Win + Middle-hold-move: Resize Window\n- Win + Ctrl + Scroll: Adjust Transparency\n- Win + Scroll: Switch Virtual Desktop\n\nRight-click the tray icon for more options and to toggle features.", L"WinCtrl", MB_OK | MB_ICONINFORMATION);
+            MessageBox(hWnd, helpMessage, L"WinCtrl", MB_OK | MB_ICONINFORMATION);
+
             break;
         case WM_RBUTTONUP:
         {
