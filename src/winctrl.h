@@ -4,6 +4,8 @@
 #include <windows.h>
 #include <chrono>
 
+#include "features.h"
+
 // STATE
 
 extern bool s_isMiddleMouseButtonDown;

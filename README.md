@@ -2,6 +2,10 @@
 
 GNOME like mouse-centric window management on Windows.
 
+<div align="center">
+  <img src="./resources/icon.svg" width="200">
+</div>
+
 ## Features
 
   - **Move Windows**: Hold down the <kbd>Win</kbd> key and drag a window with the `Left Mouse Button` (hold and drag) to move it. You don't have to target the titlebar!
@@ -41,16 +45,38 @@ This application uses a low-level global mouse hook to intercept all mouse event
 
 ## Development
 
-### Build
+### Adding an Icon
+
+To embed an icon (e.g., `resources/icon.ico`) into your executable, first create a resource script file (e.g., `src/resources.rc`) with the line `IDI_ICON1 ICON "resources/icon.ico"`. Then, compile it using `windres`:
+
+```bash
+windres src/resources.rc -O coff -o resources/winctrl.res
+```
+
+Finally, include `resources/winctrl.res` in your `g++` compilation command (e.g., `g++ ... resources/winctrl.res -o winctrl.exe ...`).
+
+### Build (Console Application)
 
 ```
-g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl.exe -luser32
+g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp winctrl.res -o winctrl.exe -luser32 -mconsole
 ```
 
-### Release
+### Build (Tray Application)
 
 ```
-g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp -o winctrl.exe -luser32 -mwindows
+g++ src/tray.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp winctrl.res -o winctrl_tray.exe -luser32 -mwindows
+```
+
+### Release (Console Application)
+
+```
+g++ src/main.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp winctrl.res -o winctrl.exe -luser32 -mwindows
+```
+
+### Release (Tray Application)
+
+```
+g++ src/tray.cpp src/hooks.cpp src/winctrl.cpp src/helpers.cpp winctrl.res -o winctrl_tray.exe -luser32 -mwindows
 ```
 
 #### Flags
