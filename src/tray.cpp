@@ -85,10 +85,17 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             // Add feature toggles
             AppendMenu(hMenu, MF_STRING | (s_isWinCtrlEnabled ? MF_CHECKED : MF_UNCHECKED), 1002, L"Enable WinCtrl");
-            AppendMenu(hMenu, MF_STRING | (s_isDraggingEnabled ? MF_CHECKED : MF_UNCHECKED), 1003, L"Enable Dragging");
-            AppendMenu(hMenu, MF_STRING | (s_isResizingEnabled ? MF_CHECKED : MF_UNCHECKED), 1004, L"Enable Resizing");
-            AppendMenu(hMenu, MF_STRING | (s_isTransparencyEnabled ? MF_CHECKED : MF_UNCHECKED), 1005, L"Enable Transparency");
-            AppendMenu(hMenu, MF_STRING | (s_isVirtualDesktopSwitchingEnabled ? MF_CHECKED : MF_UNCHECKED), 1006, L"Enable Virtual Desktop Switching");
+
+            // Determine the flags for other menu items based on s_isWinCtrlEnabled
+            UINT otherFeaturesFlags = MF_STRING;
+            if (!s_isWinCtrlEnabled)
+            {
+                otherFeaturesFlags |= MF_GRAYED; // Grey out if WinCtrl is disabled
+            }
+            AppendMenu(hMenu, otherFeaturesFlags | (s_isDraggingEnabled ? MF_CHECKED : MF_UNCHECKED), 1003, L"Enable Dragging");
+            AppendMenu(hMenu, otherFeaturesFlags | (s_isResizingEnabled ? MF_CHECKED : MF_UNCHECKED), 1004, L"Enable Resizing");
+            AppendMenu(hMenu, otherFeaturesFlags | (s_isTransparencyEnabled ? MF_CHECKED : MF_UNCHECKED), 1005, L"Enable Transparency");
+            AppendMenu(hMenu, otherFeaturesFlags | (s_isVirtualDesktopSwitchingEnabled ? MF_CHECKED : MF_UNCHECKED), 1006, L"Enable Virtual Desktop Switching");
 
             AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);    // Separator
             AppendMenu(hMenu, MF_STRING, 1001, L"Exit"); // Menu item with ID 1001
