@@ -29,7 +29,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
     if (nCode == HC_ACTION)
     {
         // If disabled, skip entirely
-        if (!s_isWinCtrlEnabled)
+        if (!Feature::isWinCtrlEnabled)
         {
             return CallNextHookEx(s_mouseHook, nCode, wParam, lParam);
         }
@@ -61,11 +61,11 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
             // Mouse move
             case WM_MOUSEMOVE:
-                if (s_isDraggingEnabled && isDragging())
+                if (Feature::Move && isDragging())
                     performDrag(pMouse);
-                else if (s_isResizingEnabled && isResizing())
+                else if (Feature::Resize && isResizing())
                     performResize(pMouse);
-                else if (s_isDraggingEnabled && s_isLeftMouseButtonDown)
+                else if (Feature::Move && s_isLeftMouseButtonDown)
                 {
                     // If left button is down and we are not yet dragging, check for movement to start dragging
                     const int DRAG_THRESHOLD = 5; // Pixels
@@ -76,7 +76,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                         s_shouldConsumeWin = true;
                     }
                 }
-                else if (s_isResizingEnabled && s_isMiddleMouseButtonDown)
+                else if (Feature::Resize && s_isMiddleMouseButtonDown)
                 {
                     // If middle button is down and we are not yet resizing, check for movement to start resizing
                     const int DRAG_THRESHOLD = 5; // Pixels
@@ -106,7 +106,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                     {
                         toggleMaximizeRestore(pMouse);
                     }
-                    else if (s_isDraggingEnabled && isDragging())
+                    else if (Feature::Move && isDragging())
                     {
                         stopDragging(pMouse);
                     }
@@ -115,7 +115,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
             // Middle button up
             case WM_MBUTTONUP:
-                if (s_isResizingEnabled)
+                if (Feature::Resize)
                 {
                     stopResizing();
                 }
@@ -127,7 +127,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 // Check if Ctrl is also pressed for transparency adjustment
                 if (GetAsyncKeyState(VK_CONTROL) & KEY_PRESSED_FLAG)
                 {
-                    if (s_isTransparencyEnabled && handleTransparency(pMouse))
+                    if (Feature::Transparency && handleTransparency(pMouse))
                     {
                         s_shouldConsumeWin = true;
                         return 1; // Consume the mouse-scroll to prevent propagation
@@ -137,7 +137,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 else
                 {
                     // The event was handled (and not throttled), so consume it
-                    if (s_isVirtualDesktopSwitchingEnabled && handleMouseWheel(pMouse))
+                    if (Feature::VirtualDesktopScroll && handleMouseWheel(pMouse))
                         s_shouldConsumeWin = true;
                 }
                 break;

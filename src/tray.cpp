@@ -84,19 +84,19 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             HMENU hMenu = CreatePopupMenu();
 
             // Add feature toggles
-            AppendMenu(hMenu, MF_STRING | (s_isWinCtrlEnabled ? MF_CHECKED : MF_UNCHECKED), 1002, L"Enable WinCtrl");
+            AppendMenu(hMenu, MF_STRING | (Feature::isWinCtrlEnabled ? MF_CHECKED : MF_UNCHECKED), 1002, L"Enable WinCtrl");
             AppendMenu(hMenu, MF_SEPARATOR, 0, NULL); // Separator
 
-            // Determine the flags for other menu items based on s_isWinCtrlEnabled
+            // Determine the flags for other menu items based on Feature::isWinCtrlEnabled
             UINT otherFeaturesFlags = MF_STRING;
-            if (!s_isWinCtrlEnabled)
+            if (!Feature::isWinCtrlEnabled)
             {
                 otherFeaturesFlags |= MF_GRAYED; // Grey out if WinCtrl is disabled
             }
-            AppendMenu(hMenu, otherFeaturesFlags | (s_isDraggingEnabled ? MF_CHECKED : MF_UNCHECKED), 1003, L"Enable Dragging");
-            AppendMenu(hMenu, otherFeaturesFlags | (s_isResizingEnabled ? MF_CHECKED : MF_UNCHECKED), 1004, L"Enable Resizing");
-            AppendMenu(hMenu, otherFeaturesFlags | (s_isTransparencyEnabled ? MF_CHECKED : MF_UNCHECKED), 1005, L"Enable Transparency");
-            AppendMenu(hMenu, otherFeaturesFlags | (s_isVirtualDesktopSwitchingEnabled ? MF_CHECKED : MF_UNCHECKED), 1006, L"Enable Virtual Desktop Switching");
+            AppendMenu(hMenu, otherFeaturesFlags | (Feature::Move ? MF_CHECKED : MF_UNCHECKED), 1003, L"Enable Dragging");
+            AppendMenu(hMenu, otherFeaturesFlags | (Feature::Resize ? MF_CHECKED : MF_UNCHECKED), 1004, L"Enable Resizing");
+            AppendMenu(hMenu, otherFeaturesFlags | (Feature::Transparency ? MF_CHECKED : MF_UNCHECKED), 1005, L"Enable Transparency");
+            AppendMenu(hMenu, otherFeaturesFlags | (Feature::VirtualDesktopScroll ? MF_CHECKED : MF_UNCHECKED), 1006, L"Enable Virtual Desktop Switching");
 
             AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);    // Separator
             AppendMenu(hMenu, MF_STRING, 1001, L"Exit"); // Menu item with ID 1001
@@ -122,19 +122,19 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             PostQuitMessage(0);
             break;
         case 1002: // "Pause WinCtrl" clicked
-            toggleWinCtrlEnabled();
+            Feature::toggleWinCtrlEnabled();
             break;
         case 1003: // "Enable Dragging" clicked
-            toggleDraggingEnabled();
+            Feature::toggleMove();
             break;
         case 1004: // "Enable Resizing" clicked
-            toggleResizingEnabled();
+            Feature::toggleResize();
             break;
         case 1005: // "Enable Transparency" clicked
-            toggleTransparencyEnabled();
+            Feature::toggleTransparency();
             break;
         case 1006: // "Enable Virtual Desktop Switching" clicked
-            toggleVirtualDesktopSwitchingEnabled();
+            Feature::toggleVirtualDesktopScroll();
             break;
         }
         break;
