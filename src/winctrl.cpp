@@ -125,7 +125,11 @@ void startResizing(MSLLHOOKSTRUCT *pMouse)
         return;
     }
 
-    s_isResizing = true; // Start resizing
+    s_isResizing = true;                                  // Start resizing
+    s_isDragging = false;                                 // Ensure only one mode is active
+    s_initialMousePos = pMouse->pt;                       // Store the initial mouse position
+    GetWindowRect(s_draggedWindow, &s_initialWindowRect); // Store the initial window rect
+
 
     // Determine the resize region based on a 3x3 grid
     RECT rect = s_initialWindowRect;
