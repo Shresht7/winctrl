@@ -70,7 +70,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             HMENU hMenu = CreatePopupMenu();
 
             // Add feature toggles
-            AppendMenu(hMenu, MF_STRING | (s_isWinCtrlPaused ? MF_CHECKED : MF_UNCHECKED), 1002, L"Pause WinCtrl");
+            AppendMenu(hMenu, MF_STRING | (s_isWinCtrlEnabled ? MF_CHECKED : MF_UNCHECKED), 1002, L"Enable WinCtrl");
             AppendMenu(hMenu, MF_STRING | (s_isDraggingEnabled ? MF_CHECKED : MF_UNCHECKED), 1003, L"Enable Dragging");
             AppendMenu(hMenu, MF_STRING | (s_isResizingEnabled ? MF_CHECKED : MF_UNCHECKED), 1004, L"Enable Resizing");
             AppendMenu(hMenu, MF_STRING | (s_isTransparencyEnabled ? MF_CHECKED : MF_UNCHECKED), 1005, L"Enable Transparency");
@@ -100,7 +100,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             PostQuitMessage(0);
             break;
         case 1002: // "Pause WinCtrl" clicked
-            toggleWinCtrlPaused();
+            toggleWinCtrlEnabled();
             break;
         case 1003: // "Enable Dragging" clicked
             toggleDraggingEnabled();

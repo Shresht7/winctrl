@@ -48,14 +48,14 @@ std::chrono::steady_clock::time_point s_isLeftMouseButtonDownTime;
 POINT s_isLeftMouseButtonDownPos;
 
 // FEATURE TOGGLES
-bool s_isWinCtrlPaused = false;
+bool s_isWinCtrlEnabled = true;
 bool s_isDraggingEnabled = true;
 bool s_isResizingEnabled = true;
 bool s_isTransparencyEnabled = true;
 bool s_isVirtualDesktopSwitchingEnabled = true;
 
 // FEATURE TOGGLE FUNCTIONS
-void toggleWinCtrlPaused() { s_isWinCtrlPaused = !s_isWinCtrlPaused; }
+void toggleWinCtrlEnabled() { s_isWinCtrlEnabled = !s_isWinCtrlEnabled; }
 void toggleDraggingEnabled() { s_isDraggingEnabled = !s_isDraggingEnabled; }
 void toggleResizingEnabled() { s_isResizingEnabled = !s_isResizingEnabled; }
 void toggleTransparencyEnabled() { s_isTransparencyEnabled = !s_isTransparencyEnabled; }

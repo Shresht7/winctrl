@@ -28,8 +28,8 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     if (nCode == HC_ACTION)
     {
-        // If paused, skip entirely
-        if (s_isWinCtrlPaused)
+        // If disabled, skip entirely
+        if (!s_isWinCtrlEnabled)
         {
             return CallNextHookEx(s_mouseHook, nCode, wParam, lParam);
         }
