@@ -85,6 +85,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             // Add feature toggles
             AppendMenu(hMenu, MF_STRING | (s_isWinCtrlEnabled ? MF_CHECKED : MF_UNCHECKED), 1002, L"Enable WinCtrl");
+            AppendMenu(hMenu, MF_SEPARATOR, 0, NULL); // Separator
 
             // Determine the flags for other menu items based on s_isWinCtrlEnabled
             UINT otherFeaturesFlags = MF_STRING;
